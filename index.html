@@ -515,6 +515,23 @@
       transform: translate(-50%, 0);
     }
 
+
+    /* ---------- Local demo authentication ---------- */
+    [hidden] { display: none !important; }
+    .auth-screen { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+    .auth-card { width: min(420px, 100%); background: #fff; border: 1px solid #edf0f5; border-radius: 14px; padding: 28px; box-shadow: 0 12px 40px #25355212; }
+    .auth-card h1 { margin: 0 0 8px; font: 800 25px Manrope, sans-serif; color: #17243a; }
+    .auth-card > p { margin: 0 0 20px; color: #7d899d; font-size: 13px; line-height: 1.5; }
+    .auth-card label { display: block; color: #445169; font-size: 12px; font-weight: 600; margin: 14px 0 6px; }
+    .auth-card input { width: 100%; font: 13px 'DM Sans', sans-serif; color: #354158; border: 1px solid #e2e7ef; border-radius: 7px; padding: 11px 10px; }
+    .auth-card button[type="submit"] { width: 100%; margin-top: 18px; }
+    .auth-switch { border: 0; background: none; color: var(--blue); cursor: pointer; font: 600 12px 'DM Sans', sans-serif; padding: 12px 0 0; width: 100%; }
+    .auth-message { min-height: 18px; margin-top: 12px; color: #c43e3e; font-size: 12px; }
+    .auth-field-error { display: block; min-height: 0; margin-top: 4px; color: #c43e3e; font-size: 11px; }
+    .auth-note { margin-top: 18px !important; padding: 10px; border-radius: 7px; background: #f6f8fc; font-size: 11px !important; }
+    .account-controls { display: flex; gap: 10px; align-items: center; }
+    .account-email { color: #65738a; font-size: 12px; }
+    @media (max-width: 500px) { .auth-card { padding: 22px; } .account-email { display: none; } }
     /* ---------- Responsive ---------- */
     @media (max-width: 700px) {
       .wrap {
@@ -567,24 +584,48 @@
   </style>
 </head>
 <body>
-  <header class="topbar">
+  <section class="auth-screen" id="auth-screen" aria-labelledby="auth-title">
+    <div class="auth-card">
+      <a class="brand" href="#inicio" aria-label="Task Tracker, home"><span class="brand-mark">✓</span><span>Organize<span class="brand-light">Tasks</span></span></a>
+      <h1 id="auth-title" style="margin-top:22px">Sign in</h1>
+      <p id="auth-description">Sign in to manage your tasks in this browser.</p>
+      <form id="auth-form" novalidate>
+        <div id="auth-name-field" hidden>
+          <label for="auth-name">Name</label>
+          <input id="auth-name" name="name" autocomplete="name" maxlength="80" placeholder="Your name">
+          <small class="auth-field-error" id="auth-name-error" aria-live="polite"></small>
+        </div>
+        <label for="auth-email">Email</label>
+        <input id="auth-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com">
+        <small class="auth-field-error" id="auth-email-error" aria-live="polite"></small>
+        <label for="auth-password">Password</label>
+        <input id="auth-password" name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="At least 8 characters">
+        <small class="auth-field-error" id="auth-password-error" aria-live="polite"></small>
+        <button class="button button-primary" id="auth-submit" type="submit">Sign in</button>
+        <div class="auth-message" id="auth-message" role="status" aria-live="polite"></div>
+      </form>
+      <button class="auth-switch" id="auth-switch" type="button">New here? Create an account</button>
+      <p class="auth-note">Demo only: accounts and tasks are stored in this browser. This is not secure authentication and does not sync between devices.</p>
+    </div>
+  </section>
+  <header class="topbar" hidden>
     <div class="wrap topbar-inner">
       <a class="brand" href="#inicio" aria-label="Task Tracker, home">
         <span class="brand-mark">✓</span>
         <span>Organize<span class="brand-light">Tasks</span></span>
       </a>
-      <span class="local-badge"><span class="dot"></span> Saved on this device</span>
+      <div class="account-controls"><span class="account-email" id="account-email"></span><button class="button button-secondary" id="logout-button" type="button">Log out</button><span class="local-badge"><span class="dot"></span> Saved on this device</span></div>
     </div>
   </header>
 
-  <main class="wrap" id="inicio">
+  <main class="wrap" id="inicio" hidden>
     <section class="intro">
       <div>
         <p class="eyebrow">ORGANIZATION DASHBOARD</p>
         <h1>Your tasks, in order.</h1>
         <p class="subtitle">Plan what needs to be done and track each step.</p>
       </div>
-      <button data-testid="new-task-button" class="button button-primary" id="new-task-button" type="button"><span aria-hidden="true">＋</span> New task</button>
+      <button class="button button-primary" id="new-task-button" type="button"><span aria-hidden="true">＋</span> New task</button>
     </section>
 
     <section class="stats" aria-label="Task summary">
@@ -618,7 +659,7 @@
         </div>
         <label class="filter-label" for="status-filter">
           Filter by status
-          <select data-testid="status-filter" id="status-filter">
+          <select id="status-filter">
             <option value="All">All statuses</option>
             <option>Pending</option>
             <option>In progress</option>
@@ -626,14 +667,14 @@
           </select>
         </label>
       </div>
-      <div data-testid="task-list" id="task-list" class="task-list" aria-live="polite"></div>
+      <div id="task-list" class="task-list" aria-live="polite"></div>
     </section>
 
     <footer>Academic project · Software Quality Assurance</footer>
   </main>
 
-  <dialog data-testid="task-dialog" id="task-dialog" aria-labelledby="dialog-title">
-    <form data-testid="task-form" id="task-form" novalidate>
+  <dialog id="task-dialog" aria-labelledby="dialog-title">
+    <form id="task-form" novalidate>
       <div class="dialog-heading">
         <div>
           <p class="eyebrow">ACTIVITY DETAILS</p>
@@ -678,7 +719,7 @@
     </form>
   </dialog>
 
-  <div data-testid="toast" id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
     (function (root) {
@@ -782,10 +823,83 @@
   <script>
     (() => {
       'use strict';
+      const USERS_KEY = 'task-tracker-demo-users-v1';
+      const $ = selector => document.querySelector(selector);
+      const authScreen = $('#auth-screen');
+      const form = $('#auth-form');
+      let mode = 'login';
+      let currentUser = sessionStorage.getItem('task-tracker-demo-session-v1');
+      function getUsers() { try { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); } catch (_) { return {}; } }
+      function setMode(next) {
+        mode = next; const registering = mode === 'register';
+        $('#auth-title').textContent = registering ? 'Create account' : 'Sign in';
+        $('#auth-description').textContent = registering ? 'Create an account to start organizing your tasks.' : 'Sign in to manage your tasks in this browser.';
+        $('#auth-submit').textContent = registering ? 'Create account' : 'Sign in';
+        $('#auth-switch').textContent = registering ? 'Already have an account? Sign in' : 'New here? Create an account';
+        $('#auth-name-field').hidden = !registering; $('#auth-name').required = registering;
+        $('#auth-password').autocomplete = registering ? 'new-password' : 'current-password'; $('#auth-message').textContent = '';
+        ['auth-name-error', 'auth-email-error', 'auth-password-error'].forEach(id => { $('#' + id).textContent = ''; });
+      }
+      function showApp() {
+        authScreen.hidden = true; document.querySelector('header').hidden = false; document.querySelector('main').hidden = false;
+        $('#account-email').textContent = currentUser || ''; window.dispatchEvent(new Event('task-tracker-auth-changed'));
+      }
+      function showAuth() {
+        currentUser = null; sessionStorage.removeItem('task-tracker-demo-session-v1'); authScreen.hidden = false;
+        document.querySelector('header').hidden = true; document.querySelector('main').hidden = true; setMode('login'); form.reset();
+      }
+      async function passwordHash(password, salt) {
+        const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+        const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode(salt), iterations: 120000, hash: 'SHA-256' }, key, 256);
+        return Array.from(new Uint8Array(bits), byte => byte.toString(16).padStart(2, '0')).join('');
+      }
+      function randomSalt() { return Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join(''); }
+      $('#auth-switch').addEventListener('click', () => setMode(mode === 'login' ? 'register' : 'login'));
+      $('#logout-button').addEventListener('click', showAuth);
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        const emailInput = $('#auth-email'); const passwordInput = $('#auth-password'); const nameInput = $('#auth-name');
+        const email = emailInput.value.trim().toLowerCase(); const password = passwordInput.value; const name = nameInput.value.trim();
+        const users = getUsers(); const message = $('#auth-message'); message.textContent = '';
+        ['auth-name-error', 'auth-email-error', 'auth-password-error'].forEach(id => { $('#' + id).textContent = ''; });
+        if (mode === 'register' && !name) { $('#auth-name-error').textContent = 'Enter your name.'; nameInput.focus(); return; }
+        if (!email || !emailInput.validity.valid) { $('#auth-email-error').textContent = 'Enter a valid email address.'; emailInput.focus(); return; }
+        if (mode === 'register' && users[email]) { $('#auth-email-error').textContent = 'An account with this email already exists.'; emailInput.focus(); return; }
+        if (!password) { $('#auth-password-error').textContent = 'Enter a password.'; passwordInput.focus(); return; }
+        if (mode === 'register' && password.length < 8) { $('#auth-password-error').textContent = 'Use a password with at least 8 characters.'; passwordInput.focus(); return; }
+        if (!window.crypto || !crypto.subtle) { message.textContent = 'Secure browser crypto is unavailable. Open through HTTPS or localhost.'; return; }
+        try {
+          if (mode === 'register') {
+            const salt = randomSalt(); users[email] = { name, salt, passwordHash: await passwordHash(password, salt) };
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+          } else {
+            const account = users[email];
+            if (!account || await passwordHash(password, account.salt) !== account.passwordHash) { message.textContent = 'Email or password is incorrect.'; return; }
+          }
+          currentUser = email; sessionStorage.setItem('task-tracker-demo-session-v1', currentUser); form.reset(); showApp();
+        } catch (_) { message.textContent = 'Could not save this account. Check browser storage and try again.'; }
+      });
+      window.TaskDemoAuth = { get user() { return currentUser; } };
+      if (currentUser && getUsers()[currentUser]) showApp(); else showAuth();
+    })();
+  </script>
+  <script>
+    (() => {
+      'use strict';
 
       const $ = selector => document.querySelector(selector);
       const core = window.TaskCore;
-      const storage = window.localStorage;
+      const storage = {
+        getItem(key) {
+          const user = window.TaskDemoAuth.user;
+          return user ? window.localStorage.getItem(`${key}:${user}`) : null;
+        },
+        setItem(key, value) {
+          const user = window.TaskDemoAuth.user;
+          if (!user) throw new Error('Sign in is required.');
+          window.localStorage.setItem(`${key}:${user}`, value);
+        }
+      };
 
       let tasks = core.readTasks(storage);
       let toastTimer;
@@ -822,7 +936,6 @@
         if (!visible.length) {
           const empty = document.createElement('div');
           empty.className = 'empty-state';
-          empty.dataset.testid = 'empty-state';
 
           const icon = document.createElement('div');
           icon.className = 'empty-icon';
@@ -846,8 +959,6 @@
         visible.forEach(task => {
           const card = document.createElement('article');
           card.className = 'task-card';
-          card.dataset.testid = 'task-card';
-          card.dataset.taskId = task.id;
 
           // Title and description
           const info = document.createElement('div');
@@ -884,7 +995,6 @@
           // Status (click to advance)
           const status = document.createElement('button');
           status.type = 'button';
-          status.dataset.testid = 'task-status-button';
           status.className = `status-pill status-${task.status.replaceAll(' ', '-')}`;
           status.textContent = task.status;
           status.setAttribute('aria-label', `Change status of ${task.title}; current: ${task.status}`);
@@ -902,13 +1012,11 @@
 
           const edit = document.createElement('button');
           edit.type = 'button';
-          edit.dataset.testid = 'task-edit-button';
           edit.textContent = 'Edit';
           edit.addEventListener('click', () => openEdit(task));
 
           const remove = document.createElement('button');
           remove.type = 'button';
-          remove.dataset.testid = 'task-delete-button';
           remove.className = 'delete';
           remove.textContent = 'Delete';
           remove.addEventListener('click', () => {
@@ -986,7 +1094,8 @@
         }
       });
 
-      render();
+      window.addEventListener('task-tracker-auth-changed', () => { tasks = core.readTasks(storage); render(); });
+      if (window.TaskDemoAuth.user) render();
     })();
   </script>
 </body>
