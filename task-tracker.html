@@ -584,7 +584,7 @@
         <h1>Your tasks, in order.</h1>
         <p class="subtitle">Plan what needs to be done and track each step.</p>
       </div>
-      <button class="button button-primary" id="new-task-button" type="button"><span aria-hidden="true">＋</span> New task</button>
+      <button data-testid="new-task-button" class="button button-primary" id="new-task-button" type="button"><span aria-hidden="true">＋</span> New task</button>
     </section>
 
     <section class="stats" aria-label="Task summary">
@@ -618,7 +618,7 @@
         </div>
         <label class="filter-label" for="status-filter">
           Filter by status
-          <select id="status-filter">
+          <select data-testid="status-filter" id="status-filter">
             <option value="All">All statuses</option>
             <option>Pending</option>
             <option>In progress</option>
@@ -626,14 +626,14 @@
           </select>
         </label>
       </div>
-      <div id="task-list" class="task-list" aria-live="polite"></div>
+      <div data-testid="task-list" id="task-list" class="task-list" aria-live="polite"></div>
     </section>
 
     <footer>Academic project · Software Quality Assurance</footer>
   </main>
 
-  <dialog id="task-dialog" aria-labelledby="dialog-title">
-    <form id="task-form" novalidate>
+  <dialog data-testid="task-dialog" id="task-dialog" aria-labelledby="dialog-title">
+    <form data-testid="task-form" id="task-form" novalidate>
       <div class="dialog-heading">
         <div>
           <p class="eyebrow">ACTIVITY DETAILS</p>
@@ -678,7 +678,7 @@
     </form>
   </dialog>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div data-testid="toast" id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
     (function (root) {
@@ -822,6 +822,7 @@
         if (!visible.length) {
           const empty = document.createElement('div');
           empty.className = 'empty-state';
+          empty.dataset.testid = 'empty-state';
 
           const icon = document.createElement('div');
           icon.className = 'empty-icon';
@@ -845,6 +846,8 @@
         visible.forEach(task => {
           const card = document.createElement('article');
           card.className = 'task-card';
+          card.dataset.testid = 'task-card';
+          card.dataset.taskId = task.id;
 
           // Title and description
           const info = document.createElement('div');
@@ -881,6 +884,7 @@
           // Status (click to advance)
           const status = document.createElement('button');
           status.type = 'button';
+          status.dataset.testid = 'task-status-button';
           status.className = `status-pill status-${task.status.replaceAll(' ', '-')}`;
           status.textContent = task.status;
           status.setAttribute('aria-label', `Change status of ${task.title}; current: ${task.status}`);
@@ -898,11 +902,13 @@
 
           const edit = document.createElement('button');
           edit.type = 'button';
+          edit.dataset.testid = 'task-edit-button';
           edit.textContent = 'Edit';
           edit.addEventListener('click', () => openEdit(task));
 
           const remove = document.createElement('button');
           remove.type = 'button';
+          remove.dataset.testid = 'task-delete-button';
           remove.className = 'delete';
           remove.textContent = 'Delete';
           remove.addEventListener('click', () => {
