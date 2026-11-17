@@ -598,7 +598,7 @@
 <body>
   <section class="auth-screen" id="auth-screen" aria-labelledby="auth-title">
     <div class="auth-card">
-      <a class="brand" href="/login" aria-label="Task Tracker, home"><span class="brand-mark">✓</span><span>Organize<span class="brand-light">Tasks</span></span></a>
+      <a class="brand" href="#login" aria-label="Task Tracker, home"><span class="brand-mark">✓</span><span>Organize<span class="brand-light">Tasks</span></span></a>
       <h1 id="auth-title" style="margin-top:22px">Sign in</h1>
       <p id="auth-description">Sign in with your email or username to manage your tasks in this browser.</p>
       <form id="auth-form" novalidate>
@@ -634,7 +634,7 @@
   </section>
   <header class="topbar" hidden>
     <div class="wrap topbar-inner">
-      <a class="brand" id="brand-link" href="/inicio" aria-label="Task Tracker, home">
+      <a class="brand" id="brand-link" href="#inicio" aria-label="Task Tracker, home">
         <span class="brand-mark">✓</span>
         <span>Organize<span class="brand-light">Tasks</span></span>
       </a>
@@ -977,21 +977,13 @@
       function newUserId() { return `u-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
       function clearErrors(ids) { ids.forEach(id => { $('#' + id).textContent = ''; }); }
 
-      // ---------- Routing (History API) ----------
-      // The server must answer every path with this same file (see server.js).
-      const ROUTES = { '/login': 'login', '/cadastro': 'register', '/inicio': 'tasks', '/perfil': 'profile' };
+      // ---------- Hash routing ----------
+      const ROUTES = { '#login': 'login', '#cadastro': 'register', '#inicio': 'tasks', '#perfil': 'profile' };
       const TITLES = { login: 'Sign in', register: 'Create account', tasks: 'Tasks', profile: 'Profile' };
-      // On file:// the History API cannot change the path, so the route is kept in memory instead.
-      const usesHistory = location.protocol !== 'file:';
-      let memoryPath = '/login';
-      function currentPath() { return (usesHistory ? location.pathname : memoryPath).replace(/\/+$/, '') || '/'; }
+      function currentPath() { return location.hash || '#login'; }
       function navigate(path, replace) {
-        if (usesHistory) {
-          if (replace) history.replaceState(null, '', path);
-          else if (location.pathname !== path) history.pushState(null, '', path);
-        } else {
-          memoryPath = path;
-        }
+        if (replace) history.replaceState(null, '', `${location.pathname}${location.search}${path}`);
+        else if (location.hash !== path) location.hash = path;
         render();
       }
       function render() {
@@ -1000,7 +992,7 @@
         const protectedRoute = route === 'tasks' || route === 'profile';
         // Unknown path, protected page without a session, or login/cadastro while signed in: redirect.
         if (!route || (protectedRoute && !signedIn) || (!protectedRoute && signedIn)) {
-          navigate(signedIn ? '/inicio' : '/login', true);
+          navigate(signedIn ? '#inicio' : '#login', true);
           return;
         }
         document.title = `${TITLES[route]} · Task Tracker`;
@@ -1020,13 +1012,13 @@
         // The session cookie keeps whatever the person signed in with: email or username.
         setCookie(SESSION_COOKIE, identifier);
         window.dispatchEvent(new Event('task-tracker-auth-changed'));
-        navigate('/inicio');
+        navigate('#inicio');
       }
       function signOut() {
         currentUser = null;
         deleteCookie(SESSION_COOKIE);
         form.reset();
-        navigate('/login');
+        navigate('#login');
       }
 
       function refreshAccountUI() {
@@ -1077,13 +1069,13 @@
       }
       function randomSalt() { return Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join(''); }
 
-      $('#auth-switch').addEventListener('click', () => navigate(mode === 'login' ? '/cadastro' : '/login'));
+      $('#auth-switch').addEventListener('click', () => navigate(mode === 'login' ? '#cadastro' : '#login'));
       $('#logout-button').addEventListener('click', signOut);
-      $('#profile-button').addEventListener('click', () => navigate('/perfil'));
-      $('#back-to-tasks').addEventListener('click', () => navigate('/inicio'));
+      $('#profile-button').addEventListener('click', () => navigate('#perfil'));
+      $('#back-to-tasks').addEventListener('click', () => navigate('#inicio'));
       document.querySelectorAll('a.brand').forEach(link => link.addEventListener('click', event => {
         event.preventDefault();
-        navigate(currentUser ? '/inicio' : '/login');
+        navigate(currentUser ? '#inicio' : '#login');
       }));
       $('#profile-reset').addEventListener('click', fillProfileForm);
 
@@ -1124,7 +1116,7 @@
             saveUsers(users);
             // Do not sign in automatically: confirm the account was created and send the person to the login screen.
             form.reset();
-            navigate('/login');
+            navigate('#login', true);
             $('#auth-identifier').value = username;
             message.textContent = 'Account created successfully! Sign in to continue.';
             message.classList.add('success');
@@ -1202,7 +1194,7 @@
       // Restore the session from the cookie (it may hold an email or a username).
       currentUser = findUser(getUsers(), getCookie(SESSION_COOKIE));
       if (!currentUser && getCookie(SESSION_COOKIE)) deleteCookie(SESSION_COOKIE);
-      window.addEventListener('popstate', render);
+      window.addEventListener('hashchange', render);
       render();
     })();
   </script>
