@@ -531,7 +531,18 @@
     .auth-note { margin-top: 18px !important; padding: 10px; border-radius: 7px; background: #f6f8fc; font-size: 11px !important; }
     .account-controls { display: flex; gap: 10px; align-items: center; }
     .account-email { color: #65738a; font-size: 12px; }
-    @media (max-width: 500px) { .auth-card { padding: 22px; } .account-email { display: none; } }
+    @media (max-width: 500px) { .auth-card { padding: 22px; } .account-email { display: none; } .local-badge { display: none; } }
+
+    /* ---------- Profile page ---------- */
+    .profile-card { max-width: 640px; }
+    .profile-summary { display: flex; align-items: center; gap: 14px; padding: 18px 0 6px; }
+    .profile-avatar { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: #edf2ff; color: var(--blue); font: 800 18px Manrope, sans-serif; flex: none; }
+    .profile-summary strong { display: block; font-size: 14px; color: #26344b; overflow-wrap: anywhere; }
+    .profile-meta { display: block; margin-top: 3px; color: #7d899d; font-size: 12px; overflow-wrap: anywhere; }
+    .form-subtitle { margin: 24px 0 0; font: 700 14px Manrope, sans-serif; color: #202d42; }
+    .profile-message { min-height: 18px; margin-top: 12px; color: #238a58; font-size: 12px; }
+    .profile-message.error { color: #c43e3e; }
+
     /* ---------- Responsive ---------- */
     @media (max-width: 700px) {
       .wrap {
@@ -588,16 +599,28 @@
     <div class="auth-card">
       <a class="brand" href="#inicio" aria-label="Task Tracker, home"><span class="brand-mark">✓</span><span>Organize<span class="brand-light">Tasks</span></span></a>
       <h1 id="auth-title" style="margin-top:22px">Sign in</h1>
-      <p id="auth-description">Sign in to manage your tasks in this browser.</p>
+      <p id="auth-description">Sign in with your email or username to manage your tasks in this browser.</p>
       <form id="auth-form" novalidate>
         <div id="auth-name-field" hidden>
           <label for="auth-name">Name</label>
           <input id="auth-name" name="name" autocomplete="name" maxlength="80" placeholder="Your name">
           <small class="auth-field-error" id="auth-name-error" aria-live="polite"></small>
         </div>
-        <label for="auth-email">Email</label>
-        <input id="auth-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com">
-        <small class="auth-field-error" id="auth-email-error" aria-live="polite"></small>
+        <div id="auth-username-field" hidden>
+          <label for="auth-username">Username</label>
+          <input id="auth-username" name="username" autocomplete="username" maxlength="20" placeholder="your_username">
+          <small class="auth-field-error" id="auth-username-error" aria-live="polite"></small>
+        </div>
+        <div id="auth-identifier-field">
+          <label for="auth-identifier">Email or username</label>
+          <input id="auth-identifier" name="identifier" autocomplete="username" maxlength="254" placeholder="you@example.com or username">
+          <small class="auth-field-error" id="auth-identifier-error" aria-live="polite"></small>
+        </div>
+        <div id="auth-email-field" hidden>
+          <label for="auth-email">Email</label>
+          <input id="auth-email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com">
+          <small class="auth-field-error" id="auth-email-error" aria-live="polite"></small>
+        </div>
         <label for="auth-password">Password</label>
         <input id="auth-password" name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="At least 8 characters">
         <small class="auth-field-error" id="auth-password-error" aria-live="polite"></small>
@@ -610,11 +633,11 @@
   </section>
   <header class="topbar" hidden>
     <div class="wrap topbar-inner">
-      <a class="brand" href="#inicio" aria-label="Task Tracker, home">
+      <a class="brand" id="brand-link" href="#inicio" aria-label="Task Tracker, home">
         <span class="brand-mark">✓</span>
         <span>Organize<span class="brand-light">Tasks</span></span>
       </a>
-      <div class="account-controls"><span class="account-email" id="account-email"></span><button class="button button-secondary" id="logout-button" type="button">Log out</button><span class="local-badge"><span class="dot"></span> Saved on this device</span></div>
+      <div class="account-controls"><span class="account-email" id="account-email"></span><button class="button button-secondary" id="profile-button" type="button">Profile</button><button class="button button-secondary" id="logout-button" type="button">Log out</button><span class="local-badge"><span class="dot"></span> Saved on this device</span></div>
     </div>
   </header>
 
@@ -671,6 +694,70 @@
     </section>
 
     <footer>Academic project · Software Quality Assurance</footer>
+  </main>
+
+  <main class="wrap" id="profile-view" hidden>
+    <section class="intro">
+      <div>
+        <p class="eyebrow">MY ACCOUNT</p>
+        <h1>Your profile</h1>
+        <p class="subtitle">View and update your account details.</p>
+      </div>
+      <button class="button button-secondary" id="back-to-tasks" type="button">← Back to tasks</button>
+    </section>
+
+    <section class="task-section profile-card" aria-labelledby="profile-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="profile-title">Account details</h2>
+          <p>Changes are saved in this browser.</p>
+        </div>
+      </div>
+
+      <div class="profile-summary">
+        <span class="profile-avatar" id="profile-avatar" aria-hidden="true"></span>
+        <div>
+          <strong id="profile-summary-name"></strong>
+          <span class="profile-meta" id="profile-summary-meta"></span>
+        </div>
+      </div>
+
+      <form id="profile-form" novalidate>
+        <label for="profile-name">Name <span class="required">*</span></label>
+        <input id="profile-name" maxlength="80" autocomplete="name">
+        <small class="field-error" id="profile-name-error" aria-live="polite"></small>
+
+        <label for="profile-username">Username <span class="required">*</span></label>
+        <input id="profile-username" maxlength="20" autocomplete="username">
+        <small class="field-error" id="profile-username-error" aria-live="polite"></small>
+
+        <label for="profile-email">Email <span class="required">*</span></label>
+        <input id="profile-email" type="email" maxlength="254" autocomplete="email">
+        <small class="field-error" id="profile-email-error" aria-live="polite"></small>
+
+        <h3 class="form-subtitle">Change password</h3>
+        <p class="form-note">Leave these fields empty to keep your current password.</p>
+
+        <label for="profile-current-password">Current password</label>
+        <input id="profile-current-password" type="password" autocomplete="current-password">
+        <small class="field-error" id="profile-current-password-error" aria-live="polite"></small>
+
+        <label for="profile-new-password">New password</label>
+        <input id="profile-new-password" type="password" autocomplete="new-password" placeholder="At least 8 characters">
+        <small class="field-error" id="profile-new-password-error" aria-live="polite"></small>
+
+        <label for="profile-confirm-password">Confirm new password</label>
+        <input id="profile-confirm-password" type="password" autocomplete="new-password">
+        <small class="field-error" id="profile-confirm-password-error" aria-live="polite"></small>
+
+        <div class="profile-message" id="profile-message" role="status" aria-live="polite"></div>
+
+        <div class="dialog-actions">
+          <button class="button button-secondary" id="profile-reset" type="button">Discard changes</button>
+          <button class="button button-primary" type="submit">Save changes</button>
+        </div>
+      </form>
+    </section>
   </main>
 
   <dialog id="task-dialog" aria-labelledby="dialog-title">
@@ -825,6 +912,9 @@
       'use strict';
       const USERS_KEY = 'task-tracker-demo-users-v1';
       const SESSION_COOKIE = 'task-tracker-demo-session-v1';
+      // Usernames are stored in lowercase and cannot contain "@", so they never clash with emails.
+      const USERNAME_PATTERN = /^[a-z0-9._-]{3,20}$/;
+      const USERNAME_HINT = 'Use 3–20 characters: letters, numbers, dot, underscore or hyphen.';
 
       // ---------- Cookie helpers ----------
       function getCookie(name) {
@@ -843,27 +933,102 @@
 
       const $ = selector => document.querySelector(selector);
       const authScreen = $('#auth-screen');
+      const header = $('header');
+      const tasksView = $('#inicio');
+      const profileView = $('#profile-view');
       const form = $('#auth-form');
+      const profileForm = $('#profile-form');
+      const AUTH_ERROR_IDS = ['name', 'username', 'identifier', 'email', 'password'].map(f => `auth-${f}-error`);
+      const PROFILE_FIELDS = ['name', 'username', 'email', 'current-password', 'new-password', 'confirm-password'];
+      const PROFILE_ERROR_IDS = PROFILE_FIELDS.map(f => `profile-${f}-error`);
+
       let mode = 'login';
-      let currentUser = getCookie(SESSION_COOKIE);
-      function getUsers() { try { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); } catch (_) { return {}; } }
+      let currentUser = null;
+
+      // ---------- Users storage ----------
+      // Users are keyed by a stable id, so the email/username can change without losing tasks.
+      // Accounts created by older versions (keyed by email, no username) are migrated on read:
+      // their id stays equal to the old email, which keeps their saved tasks reachable.
+      function getUsers() {
+        let raw;
+        try { raw = JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); } catch (_) { return {}; }
+        const users = {};
+        Object.entries(raw || {}).forEach(([key, value]) => {
+          if (!value || typeof value !== 'object') return;
+          const id = value.id || key;
+          users[id] = {
+            id,
+            name: value.name || '',
+            email: value.email || key,
+            username: value.username || '',
+            salt: value.salt,
+            passwordHash: value.passwordHash
+          };
+        });
+        return users;
+      }
+      function saveUsers(users) { localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
+      function findUser(users, identifier) {
+        const wanted = String(identifier || '').trim().toLowerCase();
+        if (!wanted) return null;
+        return Object.values(users).find(u => u.email === wanted || (u.username && u.username === wanted)) || null;
+      }
+      function newUserId() { return `u-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
+      function clearErrors(ids) { ids.forEach(id => { $('#' + id).textContent = ''; }); }
+
+      // ---------- Views ----------
+      function showView(name) {
+        tasksView.hidden = name !== 'tasks';
+        profileView.hidden = name !== 'profile';
+        if (name === 'profile') fillProfileForm();
+      }
+      function refreshAccountUI() {
+        $('#account-email').textContent = currentUser ? (currentUser.username ? '@' + currentUser.username : currentUser.email) : '';
+      }
+      function setProfileMessage(text, isError) {
+        const box = $('#profile-message');
+        box.textContent = text || '';
+        box.classList.toggle('error', Boolean(isError));
+      }
+      function fillProfileForm() {
+        if (!currentUser) return;
+        $('#profile-name').value = currentUser.name;
+        $('#profile-username').value = currentUser.username;
+        $('#profile-email').value = currentUser.email;
+        ['current-password', 'new-password', 'confirm-password'].forEach(f => { $('#profile-' + f).value = ''; });
+        clearErrors(PROFILE_ERROR_IDS);
+        setProfileMessage('');
+        $('#profile-avatar').textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
+        $('#profile-summary-name').textContent = currentUser.name || currentUser.email;
+        $('#profile-summary-meta').textContent = [currentUser.username ? '@' + currentUser.username : '', currentUser.email].filter(Boolean).join(' · ');
+      }
+
+      // ---------- Auth screen ----------
       function setMode(next) {
         mode = next; const registering = mode === 'register';
         $('#auth-title').textContent = registering ? 'Create account' : 'Sign in';
-        $('#auth-description').textContent = registering ? 'Create an account to start organizing your tasks.' : 'Sign in to manage your tasks in this browser.';
+        $('#auth-description').textContent = registering ? 'Create an account to start organizing your tasks.' : 'Sign in with your email or username to manage your tasks in this browser.';
         $('#auth-submit').textContent = registering ? 'Create account' : 'Sign in';
         $('#auth-switch').textContent = registering ? 'Already have an account? Sign in' : 'New here? Create an account';
-        $('#auth-name-field').hidden = !registering; $('#auth-name').required = registering;
-        $('#auth-password').autocomplete = registering ? 'new-password' : 'current-password'; $('#auth-message').textContent = '';
-        ['auth-name-error', 'auth-email-error', 'auth-password-error'].forEach(id => { $('#' + id).textContent = ''; });
+        $('#auth-name-field').hidden = !registering;
+        $('#auth-username-field').hidden = !registering;
+        $('#auth-email-field').hidden = !registering;
+        $('#auth-identifier-field').hidden = registering;
+        $('#auth-name').required = registering;
+        $('#auth-username').required = registering;
+        $('#auth-email').required = registering;
+        $('#auth-identifier').required = !registering;
+        $('#auth-password').autocomplete = registering ? 'new-password' : 'current-password';
+        $('#auth-message').textContent = '';
+        clearErrors(AUTH_ERROR_IDS);
       }
       function showApp() {
-        authScreen.hidden = true; document.querySelector('header').hidden = false; document.querySelector('main').hidden = false;
-        $('#account-email').textContent = currentUser || ''; window.dispatchEvent(new Event('task-tracker-auth-changed'));
+        authScreen.hidden = true; header.hidden = false; showView('tasks');
+        refreshAccountUI(); window.dispatchEvent(new Event('task-tracker-auth-changed'));
       }
       function showAuth() {
         currentUser = null; deleteCookie(SESSION_COOKIE); authScreen.hidden = false;
-        document.querySelector('header').hidden = true; document.querySelector('main').hidden = true; setMode('login'); form.reset();
+        header.hidden = true; tasksView.hidden = true; profileView.hidden = true; setMode('login'); form.reset();
       }
       async function passwordHash(password, salt) {
         const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
@@ -871,33 +1036,125 @@
         return Array.from(new Uint8Array(bits), byte => byte.toString(16).padStart(2, '0')).join('');
       }
       function randomSalt() { return Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join(''); }
+
       $('#auth-switch').addEventListener('click', () => setMode(mode === 'login' ? 'register' : 'login'));
       $('#logout-button').addEventListener('click', showAuth);
+      $('#profile-button').addEventListener('click', () => showView('profile'));
+      $('#back-to-tasks').addEventListener('click', () => showView('tasks'));
+      $('#brand-link').addEventListener('click', () => showView('tasks'));
+      $('#profile-reset').addEventListener('click', fillProfileForm);
+
       form.addEventListener('submit', async event => {
         event.preventDefault();
-        const emailInput = $('#auth-email'); const passwordInput = $('#auth-password'); const nameInput = $('#auth-name');
-        const email = emailInput.value.trim().toLowerCase(); const password = passwordInput.value; const name = nameInput.value.trim();
-        const users = getUsers(); const message = $('#auth-message'); message.textContent = '';
-        ['auth-name-error', 'auth-email-error', 'auth-password-error'].forEach(id => { $('#' + id).textContent = ''; });
-        if (mode === 'register' && !name) { $('#auth-name-error').textContent = 'Enter your name.'; nameInput.focus(); return; }
-        if (!email || !emailInput.validity.valid) { $('#auth-email-error').textContent = 'Enter a valid email address.'; emailInput.focus(); return; }
-        if (mode === 'register' && users[email]) { $('#auth-email-error').textContent = 'An account with this email already exists.'; emailInput.focus(); return; }
-        if (!password) { $('#auth-password-error').textContent = 'Enter a password.'; passwordInput.focus(); return; }
-        if (mode === 'register' && password.length < 8) { $('#auth-password-error').textContent = 'Use a password with at least 8 characters.'; passwordInput.focus(); return; }
+        const message = $('#auth-message'); message.textContent = '';
+        clearErrors(AUTH_ERROR_IDS);
+        const fail = (field, text) => { $('#auth-' + field + '-error').textContent = text; $('#auth-' + field).focus(); };
+        const password = $('#auth-password').value;
+        const users = getUsers();
+        const all = Object.values(users);
+        let name, username, email, identifier;
+
+        if (mode === 'register') {
+          name = $('#auth-name').value.trim();
+          username = $('#auth-username').value.trim().toLowerCase();
+          const emailInput = $('#auth-email');
+          email = emailInput.value.trim().toLowerCase();
+          if (!name) return fail('name', 'Enter your name.');
+          if (!USERNAME_PATTERN.test(username)) return fail('username', USERNAME_HINT);
+          if (all.some(u => u.username === username)) return fail('username', 'This username is already taken.');
+          if (!email || !emailInput.validity.valid) return fail('email', 'Enter a valid email address.');
+          if (all.some(u => u.email === email)) return fail('email', 'An account with this email already exists.');
+          if (!password) return fail('password', 'Enter a password.');
+          if (password.length < 8) return fail('password', 'Use a password with at least 8 characters.');
+        } else {
+          identifier = $('#auth-identifier').value.trim().toLowerCase();
+          if (!identifier) return fail('identifier', 'Enter your email or username.');
+          if (!password) return fail('password', 'Enter a password.');
+        }
+
         if (!window.crypto || !crypto.subtle) { message.textContent = 'Secure browser crypto is unavailable. Open through HTTPS or localhost.'; return; }
         try {
           if (mode === 'register') {
-            const salt = randomSalt(); users[email] = { name, salt, passwordHash: await passwordHash(password, salt) };
-            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+            const salt = randomSalt();
+            const user = { id: newUserId(), name, email, username, salt, passwordHash: await passwordHash(password, salt) };
+            users[user.id] = user;
+            saveUsers(users);
+            currentUser = user;
+            setCookie(SESSION_COOKIE, email);
           } else {
-            const account = users[email];
-            if (!account || await passwordHash(password, account.salt) !== account.passwordHash) { message.textContent = 'Email or password is incorrect.'; return; }
+            const account = findUser(users, identifier);
+            if (!account || await passwordHash(password, account.salt) !== account.passwordHash) { message.textContent = 'Email, username or password is incorrect.'; return; }
+            currentUser = account;
+            // The session cookie keeps whatever the person signed in with: email or username.
+            setCookie(SESSION_COOKIE, identifier);
           }
-          currentUser = email; setCookie(SESSION_COOKIE, currentUser); form.reset(); showApp();
+          form.reset(); showApp();
         } catch (_) { message.textContent = 'Could not save this account. Check browser storage and try again.'; }
       });
-      window.TaskDemoAuth = { get user() { return currentUser; } };
-      if (currentUser && getUsers()[currentUser]) showApp(); else showAuth();
+
+      // ---------- Profile form ----------
+      profileForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        clearErrors(PROFILE_ERROR_IDS);
+        setProfileMessage('');
+        const fail = (field, text) => { $('#profile-' + field + '-error').textContent = text; $('#profile-' + field).focus(); };
+        const users = getUsers();
+        const user = currentUser && users[currentUser.id];
+        if (!user) { showAuth(); return; }
+
+        const name = $('#profile-name').value.trim();
+        const username = $('#profile-username').value.trim().toLowerCase();
+        const emailInput = $('#profile-email');
+        const email = emailInput.value.trim().toLowerCase();
+        const currentPassword = $('#profile-current-password').value;
+        const newPassword = $('#profile-new-password').value;
+        const confirmPassword = $('#profile-confirm-password').value;
+        const others = Object.values(users).filter(u => u.id !== user.id);
+        const changingPassword = Boolean(currentPassword || newPassword || confirmPassword);
+
+        if (!name) return fail('name', 'Enter your name.');
+        if (!USERNAME_PATTERN.test(username)) return fail('username', USERNAME_HINT);
+        if (others.some(u => u.username === username)) return fail('username', 'This username is already taken.');
+        if (!email || !emailInput.validity.valid) return fail('email', 'Enter a valid email address.');
+        if (others.some(u => u.email === email)) return fail('email', 'An account with this email already exists.');
+
+        if (changingPassword) {
+          if (!currentPassword) return fail('current-password', 'Enter your current password.');
+          if (newPassword.length < 8) return fail('new-password', 'Use a password with at least 8 characters.');
+          if (newPassword !== confirmPassword) return fail('confirm-password', 'The passwords do not match.');
+          if (!window.crypto || !crypto.subtle) { setProfileMessage('Secure browser crypto is unavailable. Open through HTTPS or localhost.', true); return; }
+          if (await passwordHash(currentPassword, user.salt) !== user.passwordHash) return fail('current-password', 'Current password is incorrect.');
+        }
+
+        try {
+          const updated = { ...user, name, username, email };
+          if (changingPassword) {
+            updated.salt = randomSalt();
+            updated.passwordHash = await passwordHash(newPassword, updated.salt);
+          }
+          users[user.id] = updated;
+          saveUsers(users);
+
+          // Keep the session cookie in sync: if the person signed in with their username, store the new
+          // username; otherwise store the new email.
+          const signedInWithUsername = Boolean(user.username) && getCookie(SESSION_COOKIE) === user.username;
+          setCookie(SESSION_COOKIE, signedInWithUsername ? username : email);
+
+          currentUser = updated;
+          refreshAccountUI();
+          fillProfileForm();
+          setProfileMessage(changingPassword ? 'Profile and password updated.' : 'Profile updated.');
+        } catch (_) {
+          setProfileMessage('Could not save your changes. Check browser storage and try again.', true);
+        }
+      });
+
+      // The tasks script reads the signed-in user's stable id from here.
+      window.TaskDemoAuth = { get id() { return currentUser ? currentUser.id : null; } };
+
+      // Restore the session from the cookie (it may hold an email or a username).
+      currentUser = findUser(getUsers(), getCookie(SESSION_COOKIE));
+      if (currentUser) showApp(); else showAuth();
     })();
   </script>
   <script>
@@ -908,13 +1165,13 @@
       const core = window.TaskCore;
       const storage = {
         getItem(key) {
-          const user = window.TaskDemoAuth.user;
-          return user ? window.localStorage.getItem(`${key}:${user}`) : null;
+          const id = window.TaskDemoAuth.id;
+          return id ? window.localStorage.getItem(`${key}:${id}`) : null;
         },
         setItem(key, value) {
-          const user = window.TaskDemoAuth.user;
-          if (!user) throw new Error('Sign in is required.');
-          window.localStorage.setItem(`${key}:${user}`, value);
+          const id = window.TaskDemoAuth.id;
+          if (!id) throw new Error('Sign in is required.');
+          window.localStorage.setItem(`${key}:${id}`, value);
         }
       };
 
@@ -1112,7 +1369,7 @@
       });
 
       window.addEventListener('task-tracker-auth-changed', () => { tasks = core.readTasks(storage); render(); });
-      if (window.TaskDemoAuth.user) render();
+      if (window.TaskDemoAuth.id) render();
     })();
   </script>
 </body>
