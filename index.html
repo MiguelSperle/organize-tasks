@@ -527,6 +527,7 @@
     .auth-card button[type="submit"] { width: 100%; margin-top: 18px; }
     .auth-switch { border: 0; background: none; color: var(--blue); cursor: pointer; font: 600 12px 'DM Sans', sans-serif; padding: 12px 0 0; width: 100%; }
     .auth-message { min-height: 18px; margin-top: 12px; color: #c43e3e; font-size: 12px; }
+    .auth-message.success { color: #238a58; font-weight: 600; }
     .auth-field-error { display: block; min-height: 0; margin-top: 4px; color: #c43e3e; font-size: 11px; }
     .auth-note { margin-top: 18px !important; padding: 10px; border-radius: 7px; background: #f6f8fc; font-size: 11px !important; }
     .account-controls { display: flex; gap: 10px; align-items: center; }
@@ -597,7 +598,7 @@
 <body>
   <section class="auth-screen" id="auth-screen" aria-labelledby="auth-title">
     <div class="auth-card">
-      <a class="brand" href="#inicio" aria-label="Task Tracker, home"><span class="brand-mark">✓</span><span>Organize<span class="brand-light">Tasks</span></span></a>
+      <a class="brand" href="/login" aria-label="Task Tracker, home"><span class="brand-mark">✓</span><span>Organize<span class="brand-light">Tasks</span></span></a>
       <h1 id="auth-title" style="margin-top:22px">Sign in</h1>
       <p id="auth-description">Sign in with your email or username to manage your tasks in this browser.</p>
       <form id="auth-form" novalidate>
@@ -633,7 +634,7 @@
   </section>
   <header class="topbar" hidden>
     <div class="wrap topbar-inner">
-      <a class="brand" id="brand-link" href="#inicio" aria-label="Task Tracker, home">
+      <a class="brand" id="brand-link" href="/inicio" aria-label="Task Tracker, home">
         <span class="brand-mark">✓</span>
         <span>Organize<span class="brand-light">Tasks</span></span>
       </a>
@@ -976,12 +977,58 @@
       function newUserId() { return `u-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
       function clearErrors(ids) { ids.forEach(id => { $('#' + id).textContent = ''; }); }
 
-      // ---------- Views ----------
-      function showView(name) {
-        tasksView.hidden = name !== 'tasks';
-        profileView.hidden = name !== 'profile';
-        if (name === 'profile') fillProfileForm();
+      // ---------- Routing (History API) ----------
+      // The server must answer every path with this same file (see server.js).
+      const ROUTES = { '/login': 'login', '/cadastro': 'register', '/inicio': 'tasks', '/perfil': 'profile' };
+      const TITLES = { login: 'Sign in', register: 'Create account', tasks: 'Tasks', profile: 'Profile' };
+      // On file:// the History API cannot change the path, so the route is kept in memory instead.
+      const usesHistory = location.protocol !== 'file:';
+      let memoryPath = '/login';
+      function currentPath() { return (usesHistory ? location.pathname : memoryPath).replace(/\/+$/, '') || '/'; }
+      function navigate(path, replace) {
+        if (usesHistory) {
+          if (replace) history.replaceState(null, '', path);
+          else if (location.pathname !== path) history.pushState(null, '', path);
+        } else {
+          memoryPath = path;
+        }
+        render();
       }
+      function render() {
+        const route = ROUTES[currentPath()];
+        const signedIn = Boolean(currentUser);
+        const protectedRoute = route === 'tasks' || route === 'profile';
+        // Unknown path, protected page without a session, or login/cadastro while signed in: redirect.
+        if (!route || (protectedRoute && !signedIn) || (!protectedRoute && signedIn)) {
+          navigate(signedIn ? '/inicio' : '/login', true);
+          return;
+        }
+        document.title = `${TITLES[route]} · Task Tracker`;
+        authScreen.hidden = protectedRoute;
+        header.hidden = !protectedRoute;
+        tasksView.hidden = route !== 'tasks';
+        profileView.hidden = route !== 'profile';
+        if (protectedRoute) {
+          refreshAccountUI();
+          if (route === 'profile') fillProfileForm();
+        } else {
+          setMode(route);
+        }
+      }
+      function signIn(user, identifier) {
+        currentUser = user;
+        // The session cookie keeps whatever the person signed in with: email or username.
+        setCookie(SESSION_COOKIE, identifier);
+        window.dispatchEvent(new Event('task-tracker-auth-changed'));
+        navigate('/inicio');
+      }
+      function signOut() {
+        currentUser = null;
+        deleteCookie(SESSION_COOKIE);
+        form.reset();
+        navigate('/login');
+      }
+
       function refreshAccountUI() {
         $('#account-email').textContent = currentUser ? (currentUser.username ? '@' + currentUser.username : currentUser.email) : '';
       }
@@ -1020,15 +1067,8 @@
         $('#auth-identifier').required = !registering;
         $('#auth-password').autocomplete = registering ? 'new-password' : 'current-password';
         $('#auth-message').textContent = '';
+        $('#auth-message').classList.remove('success');
         clearErrors(AUTH_ERROR_IDS);
-      }
-      function showApp() {
-        authScreen.hidden = true; header.hidden = false; showView('tasks');
-        refreshAccountUI(); window.dispatchEvent(new Event('task-tracker-auth-changed'));
-      }
-      function showAuth() {
-        currentUser = null; deleteCookie(SESSION_COOKIE); authScreen.hidden = false;
-        header.hidden = true; tasksView.hidden = true; profileView.hidden = true; setMode('login'); form.reset();
       }
       async function passwordHash(password, salt) {
         const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
@@ -1037,16 +1077,19 @@
       }
       function randomSalt() { return Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join(''); }
 
-      $('#auth-switch').addEventListener('click', () => setMode(mode === 'login' ? 'register' : 'login'));
-      $('#logout-button').addEventListener('click', showAuth);
-      $('#profile-button').addEventListener('click', () => showView('profile'));
-      $('#back-to-tasks').addEventListener('click', () => showView('tasks'));
-      $('#brand-link').addEventListener('click', () => showView('tasks'));
+      $('#auth-switch').addEventListener('click', () => navigate(mode === 'login' ? '/cadastro' : '/login'));
+      $('#logout-button').addEventListener('click', signOut);
+      $('#profile-button').addEventListener('click', () => navigate('/perfil'));
+      $('#back-to-tasks').addEventListener('click', () => navigate('/inicio'));
+      document.querySelectorAll('a.brand').forEach(link => link.addEventListener('click', event => {
+        event.preventDefault();
+        navigate(currentUser ? '/inicio' : '/login');
+      }));
       $('#profile-reset').addEventListener('click', fillProfileForm);
 
       form.addEventListener('submit', async event => {
         event.preventDefault();
-        const message = $('#auth-message'); message.textContent = '';
+        const message = $('#auth-message'); message.textContent = ''; message.classList.remove('success');
         clearErrors(AUTH_ERROR_IDS);
         const fail = (field, text) => { $('#auth-' + field + '-error').textContent = text; $('#auth-' + field).focus(); };
         const password = $('#auth-password').value;
@@ -1079,16 +1122,20 @@
             const user = { id: newUserId(), name, email, username, salt, passwordHash: await passwordHash(password, salt) };
             users[user.id] = user;
             saveUsers(users);
-            currentUser = user;
-            setCookie(SESSION_COOKIE, email);
+            // Do not sign in automatically: confirm the account was created and send the person to the login screen.
+            form.reset();
+            navigate('/login');
+            $('#auth-identifier').value = username;
+            message.textContent = 'Account created successfully! Sign in to continue.';
+            message.classList.add('success');
+            $('#auth-password').focus();
+            return;
           } else {
             const account = findUser(users, identifier);
             if (!account || await passwordHash(password, account.salt) !== account.passwordHash) { message.textContent = 'Email, username or password is incorrect.'; return; }
-            currentUser = account;
-            // The session cookie keeps whatever the person signed in with: email or username.
-            setCookie(SESSION_COOKIE, identifier);
+            form.reset();
+            signIn(account, identifier);
           }
-          form.reset(); showApp();
         } catch (_) { message.textContent = 'Could not save this account. Check browser storage and try again.'; }
       });
 
@@ -1100,7 +1147,7 @@
         const fail = (field, text) => { $('#profile-' + field + '-error').textContent = text; $('#profile-' + field).focus(); };
         const users = getUsers();
         const user = currentUser && users[currentUser.id];
-        if (!user) { showAuth(); return; }
+        if (!user) { signOut(); return; }
 
         const name = $('#profile-name').value.trim();
         const username = $('#profile-username').value.trim().toLowerCase();
@@ -1154,7 +1201,9 @@
 
       // Restore the session from the cookie (it may hold an email or a username).
       currentUser = findUser(getUsers(), getCookie(SESSION_COOKIE));
-      if (currentUser) showApp(); else showAuth();
+      if (!currentUser && getCookie(SESSION_COOKIE)) deleteCookie(SESSION_COOKIE);
+      window.addEventListener('popstate', render);
+      render();
     })();
   </script>
   <script>
