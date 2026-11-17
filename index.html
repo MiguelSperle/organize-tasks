@@ -607,7 +607,7 @@
 <body>
   <section class="auth-screen" id="auth-screen" aria-labelledby="auth-title">
     <div class="auth-card">
-      <a class="brand" href="#login" aria-label="Task Tracker, home"><span class="brand-mark">✓</span><span>Organize<span class="brand-light">Tasks</span></span></a>
+      <a class="brand" href="/" aria-label="Task Tracker, home"><span class="brand-mark">✓</span><span>Organize<span class="brand-light">Tasks</span></span></a>
       <h1 id="auth-title" style="margin-top:22px">Sign in</h1>
       <p id="auth-description">Sign in with your email or username to manage your tasks in this browser.</p>
       <form id="auth-form" autocomplete="off" novalidate>
@@ -987,16 +987,19 @@
       function clearErrors(ids) { ids.forEach(id => { $('#' + id).textContent = ''; }); }
 
       // ---------- Hash routing ----------
-      const ROUTES = { '#login': 'login', '#cadastro': 'register', '#inicio': 'tasks', '#perfil': 'profile' };
+      const ROUTES = { '#cadastro': 'register', '#inicio': 'tasks', '#perfil': 'profile' };
       const TITLES = { login: 'Sign in', register: 'Create account', tasks: 'Tasks', profile: 'Profile' };
-      function currentPath() { return location.hash || '#login'; }
+      function currentPath() { return location.hash || ''; }
       function navigate(path, replace) {
-        if (replace) history.replaceState(null, '', `${location.pathname}${location.search}${path}`);
-        else if (location.hash !== path) location.hash = path;
+        const url = path === '#login'
+          ? `${location.pathname}${location.search}`
+          : `${location.pathname}${location.search}${path}`;
+        if (replace) history.replaceState(null, '', url);
+        else if (`${location.pathname}${location.search}${location.hash}` !== url) history.pushState(null, '', url);
         render();
       }
       function render() {
-        const route = ROUTES[currentPath()];
+        const route = currentPath() ? ROUTES[currentPath()] : 'login';
         const signedIn = Boolean(currentUser);
         const protectedRoute = route === 'tasks' || route === 'profile';
         // Unknown path, protected page without a session, or login/cadastro while signed in: redirect.
@@ -1200,6 +1203,7 @@
       currentUser = findUser(getUsers(), getCookie(SESSION_COOKIE));
       if (!currentUser && getCookie(SESSION_COOKIE)) deleteCookie(SESSION_COOKIE);
       window.addEventListener('hashchange', render);
+      window.addEventListener('popstate', render);
       render();
     })();
   </script>
@@ -1420,3 +1424,5 @@
   </script>
 </body>
 </html>
+
+
