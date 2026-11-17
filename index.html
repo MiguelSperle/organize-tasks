@@ -824,11 +824,28 @@
     (() => {
       'use strict';
       const USERS_KEY = 'task-tracker-demo-users-v1';
+      const SESSION_COOKIE = 'task-tracker-demo-session-v1';
+
+      // ---------- Cookie helpers ----------
+      function getCookie(name) {
+        const entry = document.cookie.split('; ').find(row => row.startsWith(name + '='));
+        return entry ? decodeURIComponent(entry.slice(name.length + 1)) : null;
+      }
+      function setCookie(name, value) {
+        const secure = location.protocol === 'https:' ? '; Secure' : '';
+        // No max-age/expires: session cookie, cleared when the browser closes.
+        // To keep the login for 7 days, add "; max-age=604800" below.
+        document.cookie = `${name}=${encodeURIComponent(value)}; path=/; SameSite=Lax${secure}`;
+      }
+      function deleteCookie(name) {
+        document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
+      }
+
       const $ = selector => document.querySelector(selector);
       const authScreen = $('#auth-screen');
       const form = $('#auth-form');
       let mode = 'login';
-      let currentUser = sessionStorage.getItem('task-tracker-demo-session-v1');
+      let currentUser = getCookie(SESSION_COOKIE);
       function getUsers() { try { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); } catch (_) { return {}; } }
       function setMode(next) {
         mode = next; const registering = mode === 'register';
@@ -845,7 +862,7 @@
         $('#account-email').textContent = currentUser || ''; window.dispatchEvent(new Event('task-tracker-auth-changed'));
       }
       function showAuth() {
-        currentUser = null; sessionStorage.removeItem('task-tracker-demo-session-v1'); authScreen.hidden = false;
+        currentUser = null; deleteCookie(SESSION_COOKIE); authScreen.hidden = false;
         document.querySelector('header').hidden = true; document.querySelector('main').hidden = true; setMode('login'); form.reset();
       }
       async function passwordHash(password, salt) {
@@ -876,7 +893,7 @@
             const account = users[email];
             if (!account || await passwordHash(password, account.salt) !== account.passwordHash) { message.textContent = 'Email or password is incorrect.'; return; }
           }
-          currentUser = email; sessionStorage.setItem('task-tracker-demo-session-v1', currentUser); form.reset(); showApp();
+          currentUser = email; setCookie(SESSION_COOKIE, currentUser); form.reset(); showApp();
         } catch (_) { message.textContent = 'Could not save this account. Check browser storage and try again.'; }
       });
       window.TaskDemoAuth = { get user() { return currentUser; } };
