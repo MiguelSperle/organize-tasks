@@ -531,8 +531,8 @@
     .auth-field-error { display: block; min-height: 0; margin-top: 4px; color: #c43e3e; font-size: 11px; }
     .auth-note { margin-top: 18px !important; padding: 10px; border-radius: 7px; background: #f6f8fc; font-size: 11px !important; }
     .account-controls { display: flex; gap: 10px; align-items: center; }
-    .account-email { color: #65738a; font-size: 12px; }
-    @media (max-width: 500px) { .auth-card { padding: 22px; } .account-email { display: none; } .local-badge { display: none; } }
+
+    @media (max-width: 500px) { .auth-card { padding: 22px; } .local-badge { display: none; } }
 
     /* ---------- Profile page ---------- */
     .profile-card { max-width: 640px; }
@@ -603,27 +603,27 @@
       <p id="auth-description">Sign in with your email or username to manage your tasks in this browser.</p>
       <form id="auth-form" novalidate>
         <div id="auth-name-field" hidden>
-          <label for="auth-name">Name</label>
-          <input id="auth-name" name="name" autocomplete="name" maxlength="80" placeholder="Your name">
+
+          <input id="auth-name" name="name" aria-label="Name" autocomplete="name" maxlength="80" placeholder="Name">
           <small class="auth-field-error" id="auth-name-error" aria-live="polite"></small>
         </div>
         <div id="auth-username-field" hidden>
-          <label for="auth-username">Username</label>
-          <input id="auth-username" name="username" autocomplete="username" maxlength="20" placeholder="your_username">
+
+          <input id="auth-username" name="username" aria-label="Username" autocomplete="username" maxlength="20" placeholder="Username">
           <small class="auth-field-error" id="auth-username-error" aria-live="polite"></small>
         </div>
         <div id="auth-identifier-field">
-          <label for="auth-identifier">Email or username</label>
-          <input id="auth-identifier" name="identifier" autocomplete="username" maxlength="254" placeholder="you@example.com or username">
+
+          <input id="auth-identifier" name="identifier" aria-label="Email or username" autocomplete="username" maxlength="254" placeholder="Email or username">
           <small class="auth-field-error" id="auth-identifier-error" aria-live="polite"></small>
         </div>
         <div id="auth-email-field" hidden>
-          <label for="auth-email">Email</label>
-          <input id="auth-email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com">
+
+          <input id="auth-email" name="email" aria-label="Email" type="email" autocomplete="email" maxlength="254" placeholder="Email">
           <small class="auth-field-error" id="auth-email-error" aria-live="polite"></small>
         </div>
-        <label for="auth-password">Password</label>
-        <input id="auth-password" name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="At least 8 characters">
+
+        <input id="auth-password" name="password" aria-label="Password" type="password" autocomplete="current-password" required minlength="8" placeholder="Password">
         <small class="auth-field-error" id="auth-password-error" aria-live="polite"></small>
         <button class="button button-primary" id="auth-submit" type="submit">Sign in</button>
         <div class="auth-message" id="auth-message" role="status" aria-live="polite"></div>
@@ -638,7 +638,7 @@
         <span class="brand-mark">✓</span>
         <span>Organize<span class="brand-light">Tasks</span></span>
       </a>
-      <div class="account-controls"><span class="account-email" id="account-email"></span><button class="button button-secondary" id="profile-button" type="button">Profile</button><button class="button button-secondary" id="logout-button" type="button">Log out</button><span class="local-badge"><span class="dot"></span> Saved on this device</span></div>
+      <div class="account-controls"><button class="button button-secondary" id="profile-button" type="button">Profile</button><button class="button button-secondary" id="logout-button" type="button">Log out</button><span class="local-badge"><span class="dot"></span> Saved on this device</span></div>
     </div>
   </header>
 
@@ -1001,7 +1001,7 @@
         tasksView.hidden = route !== 'tasks';
         profileView.hidden = route !== 'profile';
         if (protectedRoute) {
-          refreshAccountUI();
+
           if (route === 'profile') fillProfileForm();
         } else {
           setMode(route);
@@ -1021,9 +1021,6 @@
         navigate('#login');
       }
 
-      function refreshAccountUI() {
-        $('#account-email').textContent = currentUser ? (currentUser.username ? '@' + currentUser.username : currentUser.email) : '';
-      }
       function setProfileMessage(text, isError) {
         const box = $('#profile-message');
         box.textContent = text || '';
@@ -1117,7 +1114,6 @@
             // Do not sign in automatically: confirm the account was created and send the person to the login screen.
             form.reset();
             navigate('#login', true);
-            $('#auth-identifier').value = username;
             message.textContent = 'Account created successfully! Sign in to continue.';
             message.classList.add('success');
             $('#auth-password').focus();
@@ -1180,7 +1176,7 @@
           setCookie(SESSION_COOKIE, signedInWithUsername ? username : email);
 
           currentUser = updated;
-          refreshAccountUI();
+
           fillProfileForm();
           setProfileMessage(changingPassword ? 'Profile and password updated.' : 'Profile updated.');
         } catch (_) {
