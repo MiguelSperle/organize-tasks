@@ -539,6 +539,9 @@
     .auth-card .auth-field-error, .profile-card .field-error { min-height: 0; margin: 0 0 5px; line-height: 1.25; }
     .auth-card .auth-field-error:not(:empty), .profile-card .field-error:not(:empty) { padding: 4px; }
     .auth-note { margin-top: 18px !important; padding: 10px; border-radius: 7px; background: #f6f8fc; font-size: 11px !important; }
+    .accepted-values { margin: 18px 0 0; padding: 12px; border-radius: 7px; background: #f6f8fc; font-size: 11px; color: #758198; list-style: none; }
+    .accepted-values li { margin: 5px 0; }
+    .accepted-values strong { color: #445169; font-weight: 600; }
     .account-controls { display: flex; gap: 10px; align-items: center; }
 
     @media (max-width: 500px) { .auth-card { padding: 22px; } .local-badge { display: none; } }
@@ -549,9 +552,8 @@
     .profile-avatar { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: #edf2ff; color: var(--blue); font: 800 18px Manrope, sans-serif; flex: none; }
     .profile-summary strong { display: block; font-size: 14px; color: #26344b; overflow-wrap: anywhere; }
     .profile-meta { display: block; margin-top: 3px; color: #7d899d; font-size: 12px; overflow-wrap: anywhere; }
-    .form-subtitle { margin: 24px 0 0; font: 700 14px Manrope, sans-serif; color: #202d42; }
-    .profile-message { min-height: 18px; margin-top: 12px; color: #238a58; font-size: 12px; }
-    .profile-message.error { color: #c43e3e; }
+    .profile-card label { display: block; color: #445169; font-size: 11px; font-weight: 600; margin: 12px 0 6px; }
+    .profile-card input { width: 100%; font: 12px 'DM Sans', sans-serif; color: #7d899d; border: 1px solid #e2e7ef; background: #f6f8fc; border-radius: 7px; padding: 9px 10px; }
 
     /* ---------- Responsive ---------- */
     @media (max-width: 700px) {
@@ -637,8 +639,9 @@
         <button class="button button-primary" id="auth-submit" type="submit">Sign in</button>
         <div class="auth-message" id="auth-message" role="status" aria-live="polite"></div>
       </form>
+      <ul class="accepted-values" id="accepted-values" aria-label="Accepted values"></ul>
       <button class="auth-switch" id="auth-switch" type="button">New here? Create an account</button>
-      <p class="auth-note">Demo only: accounts and tasks are stored in this browser. This is not secure authentication and does not sync between devices.</p>
+      <p class="auth-note">Demo only: access uses a fixed account defined in this page. This is not secure authentication and does not sync between devices.</p>
     </div>
   </section>
   <header class="topbar" hidden>
@@ -711,7 +714,7 @@
       <div>
         <p class="eyebrow">MY ACCOUNT</p>
         <h1>Your profile</h1>
-        <p class="subtitle">View and update your account details.</p>
+        <p class="subtitle">View your account details.</p>
       </div>
       <button class="button button-secondary" id="back-to-tasks" type="button">← Back to tasks</button>
     </section>
@@ -720,7 +723,7 @@
       <div class="section-heading">
         <div>
           <h2 id="profile-title">Account details</h2>
-          <p>Changes are saved in this browser.</p>
+          <p>This demo account is fixed and cannot be changed.</p>
         </div>
       </div>
 
@@ -732,41 +735,14 @@
         </div>
       </div>
 
-      <form id="profile-form" autocomplete="off" novalidate>
-        <label for="profile-name">Name <span class="required">*</span></label>
-        <input id="profile-name" maxlength="80" autocomplete="off">
-        <small class="field-error" id="profile-name-error" aria-live="polite"></small>
+      <label for="profile-name">Name</label>
+      <input id="profile-name" readonly>
 
-        <label for="profile-username">Username <span class="required">*</span></label>
-        <input id="profile-username" maxlength="20" autocomplete="off">
-        <small class="field-error" id="profile-username-error" aria-live="polite"></small>
+      <label for="profile-username">Username</label>
+      <input id="profile-username" readonly>
 
-        <label for="profile-email">Email <span class="required">*</span></label>
-        <input id="profile-email" type="email" maxlength="254" autocomplete="off">
-        <small class="field-error" id="profile-email-error" aria-live="polite"></small>
-
-        <h3 class="form-subtitle">Change password</h3>
-        <p class="form-note">Leave these fields empty to keep your current password.</p>
-
-        <label for="profile-current-password">Current password</label>
-        <input id="profile-current-password" type="password" autocomplete="off">
-        <small class="field-error" id="profile-current-password-error" aria-live="polite"></small>
-
-        <label for="profile-new-password">New password</label>
-        <input id="profile-new-password" type="password" autocomplete="off" placeholder="At least 8 characters">
-        <small class="field-error" id="profile-new-password-error" aria-live="polite"></small>
-
-        <label for="profile-confirm-password">Confirm new password</label>
-        <input id="profile-confirm-password" type="password" autocomplete="off">
-        <small class="field-error" id="profile-confirm-password-error" aria-live="polite"></small>
-
-        <div class="profile-message" id="profile-message" role="status" aria-live="polite"></div>
-
-        <div class="dialog-actions">
-          <button class="button button-secondary" id="profile-reset" type="button">Discard changes</button>
-          <button class="button button-primary" type="submit">Save changes</button>
-        </div>
-      </form>
+      <label for="profile-email">Email</label>
+      <input id="profile-email" readonly>
     </section>
   </main>
 
@@ -920,11 +896,18 @@
   <script>
     (() => {
       'use strict';
-      const USERS_KEY = 'users';
+
+      // ---------- Predefined account (edit these values to change the access) ----------
+      const DEMO_USER = {
+        id: 'demo-user',
+        name: 'Demo User',
+        username: 'demo.user',
+        email: 'demo@organizetasks.com',
+        password: 'Demo12345'
+      };
+
       const SESSION_COOKIE = 'session-identifier';
-      // Usernames are stored in lowercase and cannot contain "@", so they never clash with emails.
-      const USERNAME_PATTERN = /^[a-z0-9._-]{3,20}$/;
-      const USERNAME_HINT = 'Use 3–20 characters: letters, numbers, dot, underscore or hyphen.';
+      const INVALID_MESSAGE = 'Invalid value. Use the accepted value shown below.';
 
       // ---------- Cookie helpers ----------
       function getCookie(name) {
@@ -934,7 +917,6 @@
       function setCookie(name, value) {
         const secure = location.protocol === 'https:' ? '; Secure' : '';
         // No max-age/expires: session cookie, cleared when the browser closes.
-        // To keep the login for 7 days, add "; max-age=604800" below.
         document.cookie = `${name}=${encodeURIComponent(value)}; path=/; SameSite=Lax${secure}`;
       }
       function deleteCookie(name) {
@@ -947,44 +929,16 @@
       const tasksView = $('#home');
       const profileView = $('#profile-view');
       const form = $('#auth-form');
-      const profileForm = $('#profile-form');
       const AUTH_ERROR_IDS = ['name', 'username', 'identifier', 'email', 'password'].map(f => `auth-${f}-error`);
-      const PROFILE_FIELDS = ['name', 'username', 'email', 'current-password', 'new-password', 'confirm-password'];
-      const PROFILE_ERROR_IDS = PROFILE_FIELDS.map(f => `profile-${f}-error`);
 
       let mode = 'login';
       let currentUser = null;
 
-      // ---------- Users storage ----------
-      // Users are keyed by a stable id, so the email/username can change without losing tasks.
-      // Accounts created by older versions (keyed by email, no username) are migrated on read:
-      // their id stays equal to the old email, which keeps their saved tasks reachable.
-      function getUsers() {
-        let raw;
-        try { raw = JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); } catch (_) { return {}; }
-        const users = {};
-        Object.entries(raw || {}).forEach(([key, value]) => {
-          if (!value || typeof value !== 'object') return;
-          const id = value.id || key;
-          users[id] = {
-            id,
-            name: value.name || '',
-            email: value.email || key,
-            username: value.username || '',
-            salt: value.salt,
-            passwordHash: value.passwordHash
-          };
-        });
-        return users;
+      // ---------- Validation against the predefined account ----------
+      function isValidIdentifier(value) {
+        const wanted = String(value || '').trim().toLowerCase();
+        return wanted === DEMO_USER.email || wanted === DEMO_USER.username;
       }
-      function saveUsers(users) { localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
-      function findUser(users, identifier) {
-        const wanted = String(identifier || '').trim().toLowerCase();
-        if (!wanted) return null;
-        return Object.values(users).find(u => u.email === wanted || (u.username && u.username === wanted)) || null;
-      }
-      function newUserId() { return `u-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
-      function clearErrors(ids) { ids.forEach(id => { $('#' + id).textContent = ''; }); }
 
       // ---------- Hash routing ----------
       const ROUTES = { '#register': 'register', '#home': 'tasks', '#profile': 'profile' };
@@ -1012,16 +966,12 @@
         header.hidden = !protectedRoute;
         tasksView.hidden = route !== 'tasks';
         profileView.hidden = route !== 'profile';
-        if (protectedRoute) {
-
-          if (route === 'profile') fillProfileForm();
-        } else {
-          setMode(route);
-        }
+        if (route === 'profile') fillProfile();
+        if (!protectedRoute) setMode(route);
       }
-      function signIn(user, identifier) {
-        currentUser = user;
-        // The session cookie keeps whatever the person signed in with: email or username.
+      function signIn(identifier) {
+        currentUser = DEMO_USER;
+        // The session cookie keeps the value the person signed in with: email or username.
         setCookie(SESSION_COOKIE, identifier);
         window.dispatchEvent(new Event('task-tracker-auth-changed'));
         navigate('#home');
@@ -1033,22 +983,29 @@
         navigate('#login');
       }
 
-      function setProfileMessage(text, isError) {
-        const box = $('#profile-message');
-        box.textContent = text || '';
-        box.classList.toggle('error', Boolean(isError));
-      }
-      function fillProfileForm() {
+      function fillProfile() {
         if (!currentUser) return;
-        $('#profile-name').value = currentUser.name;
-        $('#profile-username').value = currentUser.username;
-        $('#profile-email').value = currentUser.email;
-        ['current-password', 'new-password', 'confirm-password'].forEach(f => { $('#profile-' + f).value = ''; });
-        clearErrors(PROFILE_ERROR_IDS);
-        setProfileMessage('');
-        $('#profile-avatar').textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
-        $('#profile-summary-name').textContent = currentUser.name || currentUser.email;
-        $('#profile-summary-meta').textContent = [currentUser.username ? '@' + currentUser.username : '', currentUser.email].filter(Boolean).join(' · ');
+        $('#profile-name').value = DEMO_USER.name;
+        $('#profile-username').value = DEMO_USER.username;
+        $('#profile-email').value = DEMO_USER.email;
+        $('#profile-avatar').textContent = DEMO_USER.name.charAt(0).toUpperCase();
+        $('#profile-summary-name').textContent = DEMO_USER.name;
+        $('#profile-summary-meta').textContent = `@${DEMO_USER.username} · ${DEMO_USER.email}`;
+      }
+
+      // ---------- Accepted values shown under the form ----------
+      function renderAcceptedValues(registering) {
+        const list = $('#accepted-values');
+        const items = registering
+          ? [['Name', DEMO_USER.name], ['Username', DEMO_USER.username], ['Email', DEMO_USER.email], ['Password', DEMO_USER.password]]
+          : [['Email or Username', `${DEMO_USER.email} or ${DEMO_USER.username}`], ['Password', DEMO_USER.password]];
+        list.replaceChildren(...items.map(([label, value]) => {
+          const li = document.createElement('li');
+          const strong = document.createElement('strong');
+          strong.textContent = `${label}: `;
+          li.append(strong, document.createTextNode(value));
+          return li;
+        }));
       }
 
       // ---------- Auth screen ----------
@@ -1069,16 +1026,18 @@
         $('#auth-email').required = registering;
         $('#auth-identifier').required = !registering;
         $('#auth-password').autocomplete = registering ? 'new-password' : 'current-password';
+        renderAcceptedValues(registering);
         $('#auth-message').textContent = '';
         $('#auth-message').classList.remove('success');
         clearErrors(AUTH_ERROR_IDS);
       }
-      async function passwordHash(password, salt) {
-        const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
-        const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode(salt), iterations: 120000, hash: 'SHA-256' }, key, 256);
-        return Array.from(new Uint8Array(bits), byte => byte.toString(16).padStart(2, '0')).join('');
+      function clearErrors(ids) { ids.forEach(id => { $('#' + id).textContent = ''; }); }
+      function showErrors(errors) {
+        clearErrors(AUTH_ERROR_IDS);
+        const fields = Object.keys(errors);
+        fields.forEach(field => { $('#auth-' + field + '-error').textContent = errors[field]; });
+        $('#auth-' + fields[0]).focus();
       }
-      function randomSalt() { return Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join(''); }
 
       $('#auth-switch').addEventListener('click', () => navigate(mode === 'login' ? '#register' : '#login'));
       $('#logout-button').addEventListener('click', signOut);
@@ -1088,122 +1047,60 @@
         event.preventDefault();
         navigate(currentUser ? '#home' : '#login');
       }));
-      $('#profile-reset').addEventListener('click', fillProfileForm);
 
-      form.addEventListener('submit', async event => {
+      form.addEventListener('submit', event => {
         event.preventDefault();
-        const message = $('#auth-message'); message.textContent = ''; message.classList.remove('success');
+        const message = $('#auth-message');
+        message.textContent = '';
+        message.classList.remove('success');
         clearErrors(AUTH_ERROR_IDS);
-        const fail = (field, text) => { $('#auth-' + field + '-error').textContent = text; $('#auth-' + field).focus(); };
+
         const password = $('#auth-password').value;
-        const users = getUsers();
-        const all = Object.values(users);
-        let name, username, email, identifier;
+        const errors = {};
 
         if (mode === 'register') {
-          name = $('#auth-name').value.trim();
-          username = $('#auth-username').value.trim().toLowerCase();
-          const emailInput = $('#auth-email');
-          email = emailInput.value.trim().toLowerCase();
-          if (!name) return fail('name', 'Enter your name.');
-          if (!USERNAME_PATTERN.test(username)) return fail('username', USERNAME_HINT);
-          if (all.some(u => u.username === username)) return fail('username', 'This username is already taken.');
-          if (!email || !emailInput.validity.valid) return fail('email', 'Enter a valid email address.');
-          if (all.some(u => u.email === email)) return fail('email', 'An account with this email already exists.');
-          if (!password) return fail('password', 'Enter a password.');
-          if (password.length < 8) return fail('password', 'Use a password with at least 8 characters.');
-        } else {
-          identifier = $('#auth-identifier').value.trim().toLowerCase();
-          if (!identifier) return fail('identifier', 'Enter your email or username.');
-          if (!password) return fail('password', 'Enter a password.');
+          const name = $('#auth-name').value.trim();
+          const username = $('#auth-username').value.trim().toLowerCase();
+          const email = $('#auth-email').value.trim().toLowerCase();
+
+          if (name !== DEMO_USER.name) errors.name = INVALID_MESSAGE;
+          if (username !== DEMO_USER.username) errors.username = INVALID_MESSAGE;
+          if (email !== DEMO_USER.email) errors.email = INVALID_MESSAGE;
+          if (password !== DEMO_USER.password) errors.password = INVALID_MESSAGE;
+
+          if (Object.keys(errors).length) { showErrors(errors); return; }
+
+          // Accepted only with the predefined values. Send the person to the login screen.
+          form.reset();
+          navigate('#login', true);
+          message.textContent = 'Account created successfully! Sign in to continue.';
+          message.classList.add('success');
+          $('#auth-identifier').focus();
+          return;
         }
 
-        if (!window.crypto || !crypto.subtle) { message.textContent = 'Secure browser crypto is unavailable. Open through HTTPS or localhost.'; return; }
-        try {
-          if (mode === 'register') {
-            const salt = randomSalt();
-            const user = { id: newUserId(), name, email, username, salt, passwordHash: await passwordHash(password, salt) };
-            users[user.id] = user;
-            saveUsers(users);
-            // Do not sign in automatically: confirm the account was created and send the person to the login screen.
-            form.reset();
-            navigate('#login', true);
-            message.textContent = 'Account created successfully! Sign in to continue.';
-            message.classList.add('success');
-            $('#auth-password').focus();
-            return;
-          } else {
-            const account = findUser(users, identifier);
-            if (!account || await passwordHash(password, account.salt) !== account.passwordHash) { message.textContent = 'Email, username or password is incorrect.'; return; }
-            form.reset();
-            signIn(account, identifier);
-          }
-        } catch (_) { message.textContent = 'Could not save this account. Check browser storage and try again.'; }
-      });
+        const identifier = $('#auth-identifier').value.trim();
+        if (!isValidIdentifier(identifier)) errors.identifier = INVALID_MESSAGE;
+        if (password !== DEMO_USER.password) errors.password = INVALID_MESSAGE;
 
-      // ---------- Profile form ----------
-      profileForm.addEventListener('submit', async event => {
-        event.preventDefault();
-        clearErrors(PROFILE_ERROR_IDS);
-        setProfileMessage('');
-        const fail = (field, text) => { $('#profile-' + field + '-error').textContent = text; $('#profile-' + field).focus(); };
-        const users = getUsers();
-        const user = currentUser && users[currentUser.id];
-        if (!user) { signOut(); return; }
-
-        const name = $('#profile-name').value.trim();
-        const username = $('#profile-username').value.trim().toLowerCase();
-        const emailInput = $('#profile-email');
-        const email = emailInput.value.trim().toLowerCase();
-        const currentPassword = $('#profile-current-password').value;
-        const newPassword = $('#profile-new-password').value;
-        const confirmPassword = $('#profile-confirm-password').value;
-        const others = Object.values(users).filter(u => u.id !== user.id);
-        const changingPassword = Boolean(currentPassword || newPassword || confirmPassword);
-
-        if (!name) return fail('name', 'Enter your name.');
-        if (!USERNAME_PATTERN.test(username)) return fail('username', USERNAME_HINT);
-        if (others.some(u => u.username === username)) return fail('username', 'This username is already taken.');
-        if (!email || !emailInput.validity.valid) return fail('email', 'Enter a valid email address.');
-        if (others.some(u => u.email === email)) return fail('email', 'An account with this email already exists.');
-
-        if (changingPassword) {
-          if (!currentPassword) return fail('current-password', 'Enter your current password.');
-          if (newPassword.length < 8) return fail('new-password', 'Use a password with at least 8 characters.');
-          if (newPassword !== confirmPassword) return fail('confirm-password', 'The passwords do not match.');
-          if (!window.crypto || !crypto.subtle) { setProfileMessage('Secure browser crypto is unavailable. Open through HTTPS or localhost.', true); return; }
-          if (await passwordHash(currentPassword, user.salt) !== user.passwordHash) return fail('current-password', 'Current password is incorrect.');
+        if (Object.keys(errors).length) {
+          showErrors(errors);
+          message.textContent = 'Email, username or password is incorrect.';
+          return;
         }
 
-        try {
-          const updated = { ...user, name, username, email };
-          if (changingPassword) {
-            updated.salt = randomSalt();
-            updated.passwordHash = await passwordHash(newPassword, updated.salt);
-          }
-          users[user.id] = updated;
-          saveUsers(users);
-
-          // Keep the session cookie in sync: if the person signed in with their username, store the new
-          // username; otherwise store the new email.
-          const signedInWithUsername = Boolean(user.username) && getCookie(SESSION_COOKIE) === user.username;
-          setCookie(SESSION_COOKIE, signedInWithUsername ? username : email);
-
-          currentUser = updated;
-
-          fillProfileForm();
-          setProfileMessage(changingPassword ? 'Profile and password updated.' : 'Profile updated.');
-        } catch (_) {
-          setProfileMessage('Could not save your changes. Check browser storage and try again.', true);
-        }
+        form.reset();
+        signIn(identifier.toLowerCase());
       });
 
       // The tasks script reads the signed-in user's stable id from here.
       window.TaskDemoAuth = { get id() { return currentUser ? currentUser.id : null; } };
 
-      // Restore the session from the cookie (it may hold an email or a username).
-      currentUser = findUser(getUsers(), getCookie(SESSION_COOKIE));
-      if (!currentUser && getCookie(SESSION_COOKIE)) deleteCookie(SESSION_COOKIE);
+      // Restore the session from the cookie (it may hold the email or the username).
+      const savedIdentifier = getCookie(SESSION_COOKIE);
+      if (savedIdentifier && isValidIdentifier(savedIdentifier)) currentUser = DEMO_USER;
+      else if (savedIdentifier) deleteCookie(SESSION_COOKIE);
+
       window.addEventListener('hashchange', render);
       window.addEventListener('popstate', render);
       render();
