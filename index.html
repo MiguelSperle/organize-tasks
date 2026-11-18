@@ -920,8 +920,8 @@
   <script>
     (() => {
       'use strict';
-      const USERS_KEY = 'users';
-      const SESSION_COOKIE = 'session';
+      const USERS_KEY = 'task-tracker-demo-users-v1';
+      const SESSION_COOKIE = 'task-tracker-demo-session-v1';
       // Usernames are stored in lowercase and cannot contain "@", so they never clash with emails.
       const USERNAME_PATTERN = /^[a-z0-9._-]{3,20}$/;
       const USERNAME_HINT = 'Use 3–20 characters: letters, numbers, dot, underscore or hyphen.';
@@ -1053,7 +1053,9 @@
 
       // ---------- Auth screen ----------
       function setMode(next) {
+        const changed = mode !== next;
         mode = next; const registering = mode === 'register';
+        if (changed) form.reset(); // clear every field (including the password) when switching between sign in and sign up
         $('#auth-title').textContent = registering ? 'Create account' : 'Sign in';
         $('#auth-description').textContent = registering ? 'Create an account to start organizing your tasks.' : 'Sign in with your email or username to manage your tasks in this browser.';
         $('#auth-submit').textContent = registering ? 'Create account' : 'Sign in';
@@ -1213,10 +1215,21 @@
 
       const $ = selector => document.querySelector(selector);
       const core = window.TaskCore;
+      const LEGACY_STORAGE_KEY = 'organiza-tarefas-v1';
       const storage = {
         getItem(key) {
           const id = window.TaskDemoAuth.id;
-          return id ? window.localStorage.getItem(`${key}:${id}`) : null;
+          if (!id) return null;
+          const value = window.localStorage.getItem(`${key}:${id}`);
+          if (value !== null) return value;
+
+          // One-time migration from the old storage key
+          const legacy = window.localStorage.getItem(`${LEGACY_STORAGE_KEY}:${id}`);
+          if (legacy !== null) {
+            window.localStorage.setItem(`${key}:${id}`, legacy);
+            window.localStorage.removeItem(`${LEGACY_STORAGE_KEY}:${id}`);
+          }
+          return legacy;
         },
         setItem(key, value) {
           const id = window.TaskDemoAuth.id;
@@ -1424,5 +1437,3 @@
   </script>
 </body>
 </html>
-
-
