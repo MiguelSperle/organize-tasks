@@ -643,7 +643,7 @@
   </section>
   <header class="topbar" hidden>
     <div class="wrap topbar-inner">
-      <a class="brand" id="brand-link" href="#inicio" aria-label="Organize Tasks, home">
+      <a class="brand" id="brand-link" href="#home" aria-label="Organize Tasks, home">
         <span class="brand-mark">✓</span>
         <span>Organize<span class="brand-light">Tasks</span></span>
       </a>
@@ -651,7 +651,7 @@
     </div>
   </header>
 
-  <main class="wrap" id="inicio" hidden>
+  <main class="wrap" id="home" hidden>
     <section class="intro">
       <div>
         <p class="eyebrow">ORGANIZATION DASHBOARD</p>
@@ -944,7 +944,7 @@
       const $ = selector => document.querySelector(selector);
       const authScreen = $('#auth-screen');
       const header = $('header');
-      const tasksView = $('#inicio');
+      const tasksView = $('#home');
       const profileView = $('#profile-view');
       const form = $('#auth-form');
       const profileForm = $('#profile-form');
@@ -987,7 +987,7 @@
       function clearErrors(ids) { ids.forEach(id => { $('#' + id).textContent = ''; }); }
 
       // ---------- Hash routing ----------
-      const ROUTES = { '#cadastro': 'register', '#inicio': 'tasks', '#perfil': 'profile' };
+      const ROUTES = { '#register': 'register', '#home': 'tasks', '#profile': 'profile' };
       const TITLES = { login: 'Sign in', register: 'Create account', tasks: 'Tasks', profile: 'Profile' };
       function currentPath() { return location.hash || ''; }
       function navigate(path, replace) {
@@ -1002,9 +1002,9 @@
         const route = currentPath() ? ROUTES[currentPath()] : 'login';
         const signedIn = Boolean(currentUser);
         const protectedRoute = route === 'tasks' || route === 'profile';
-        // Unknown path, protected page without a session, or login/cadastro while signed in: redirect.
+        // Unknown path, protected page without a session, or login/register while signed in: redirect.
         if (!route || (protectedRoute && !signedIn) || (!protectedRoute && signedIn)) {
-          navigate(signedIn ? '#inicio' : '#login', true);
+          navigate(signedIn ? '#home' : '#login', true);
           return;
         }
         document.title = `${TITLES[route]} · Organize Tasks`;
@@ -1024,7 +1024,7 @@
         // The session cookie keeps whatever the person signed in with: email or username.
         setCookie(SESSION_COOKIE, identifier);
         window.dispatchEvent(new Event('task-tracker-auth-changed'));
-        navigate('#inicio');
+        navigate('#home');
       }
       function signOut() {
         currentUser = null;
@@ -1080,13 +1080,13 @@
       }
       function randomSalt() { return Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join(''); }
 
-      $('#auth-switch').addEventListener('click', () => navigate(mode === 'login' ? '#cadastro' : '#login'));
+      $('#auth-switch').addEventListener('click', () => navigate(mode === 'login' ? '#register' : '#login'));
       $('#logout-button').addEventListener('click', signOut);
-      $('#profile-button').addEventListener('click', () => navigate('#perfil'));
-      $('#back-to-tasks').addEventListener('click', () => navigate('#inicio'));
+      $('#profile-button').addEventListener('click', () => navigate('#profile'));
+      $('#back-to-tasks').addEventListener('click', () => navigate('#home'));
       document.querySelectorAll('a.brand').forEach(link => link.addEventListener('click', event => {
         event.preventDefault();
-        navigate(currentUser ? '#inicio' : '#login');
+        navigate(currentUser ? '#home' : '#login');
       }));
       $('#profile-reset').addEventListener('click', fillProfileForm);
 
