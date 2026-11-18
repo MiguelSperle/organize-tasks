@@ -536,8 +536,8 @@
     .auth-message { min-height: 18px; margin-top: 12px; color: #c43e3e; font-size: 12px; }
     .auth-message.success { color: #238a58; font-weight: 600; }
     .auth-field-error { display: block; min-height: 0; margin-top: 4px; color: #c43e3e; font-size: 11px; }
-    .auth-card .auth-field-error, .profile-card .field-error { min-height: 0; margin: 0 0 5px; line-height: 1.25; }
-    .auth-card .auth-field-error:not(:empty), .profile-card .field-error:not(:empty) { padding: 4px; }
+    .auth-card .auth-field-error { min-height: 0; margin: 0 0 5px; line-height: 1.25; }
+    .auth-card .auth-field-error:not(:empty) { padding: 4px; }
     .auth-note { margin-top: 18px !important; padding: 10px; border-radius: 7px; background: #f6f8fc; font-size: 11px !important; }
     .accepted-values { margin: 18px 0 0; padding: 12px; border-radius: 7px; background: #f6f8fc; font-size: 11px; color: #758198; list-style: none; }
     .accepted-values li { margin: 5px 0; }
@@ -545,15 +545,6 @@
     .account-controls { display: flex; gap: 10px; align-items: center; }
 
     @media (max-width: 500px) { .auth-card { padding: 22px; } .local-badge { display: none; } }
-
-    /* ---------- Profile page ---------- */
-    .profile-card { max-width: 640px; }
-    .profile-summary { display: flex; align-items: center; gap: 14px; padding: 18px 0 6px; }
-    .profile-avatar { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: #edf2ff; color: var(--blue); font: 800 18px Manrope, sans-serif; flex: none; }
-    .profile-summary strong { display: block; font-size: 14px; color: #26344b; overflow-wrap: anywhere; }
-    .profile-meta { display: block; margin-top: 3px; color: #7d899d; font-size: 12px; overflow-wrap: anywhere; }
-    .profile-card label { display: block; color: #445169; font-size: 11px; font-weight: 600; margin: 12px 0 6px; }
-    .profile-card input { width: 100%; font: 12px 'DM Sans', sans-serif; color: #7d899d; border: 1px solid #e2e7ef; background: #f6f8fc; border-radius: 7px; padding: 9px 10px; }
 
     /* ---------- Responsive ---------- */
     @media (max-width: 700px) {
@@ -649,7 +640,7 @@
         <span class="brand-mark">✓</span>
         <span>Organize<span class="brand-light">Tasks</span></span>
       </a>
-      <div class="account-controls"><button class="button button-secondary" id="profile-button" type="button">Profile</button><button class="button button-secondary" id="logout-button" type="button">Log out</button><span class="local-badge"><span class="dot"></span> Saved on this device</span></div>
+      <div class="account-controls"><button class="button button-secondary" id="logout-button" type="button">Log out</button><span class="local-badge"><span class="dot"></span> Saved on this device</span></div>
     </div>
   </header>
 
@@ -706,43 +697,6 @@
     </section>
 
     <footer>Academic project · Software Quality Assurance</footer>
-  </main>
-
-  <main class="wrap" id="profile-view" hidden>
-    <section class="intro">
-      <div>
-        <p class="eyebrow">MY ACCOUNT</p>
-        <h1>Your profile</h1>
-        <p class="subtitle">View your account details.</p>
-      </div>
-      <button class="button button-secondary" id="back-to-tasks" type="button">← Back to tasks</button>
-    </section>
-
-    <section class="task-section profile-card" aria-labelledby="profile-title">
-      <div class="section-heading">
-        <div>
-          <h2 id="profile-title">Account details</h2>
-          <p>This demo account is fixed and cannot be changed.</p>
-        </div>
-      </div>
-
-      <div class="profile-summary">
-        <span class="profile-avatar" id="profile-avatar" aria-hidden="true"></span>
-        <div>
-          <strong id="profile-summary-name"></strong>
-          <span class="profile-meta" id="profile-summary-meta"></span>
-        </div>
-      </div>
-
-      <label for="profile-name">Name</label>
-      <input id="profile-name" readonly>
-
-      <label for="profile-username">Username</label>
-      <input id="profile-username" readonly>
-
-      <label for="profile-email">Email</label>
-      <input id="profile-email" readonly>
-    </section>
   </main>
 
   <dialog id="task-dialog" aria-labelledby="dialog-title">
@@ -928,7 +882,6 @@
       const authScreen = $('#auth-screen');
       const header = $('header');
       const tasksView = $('#home');
-      const profileView = $('#profile-view');
       const form = $('#auth-form');
       const AUTH_ERROR_IDS = ['name', 'username', 'identifier', 'email', 'password'].map(f => `auth-${f}-error`);
 
@@ -942,8 +895,8 @@
       }
 
       // ---------- Hash routing ----------
-      const ROUTES = { '#register': 'register', '#home': 'tasks', '#profile': 'profile' };
-      const TITLES = { login: 'Sign in', register: 'Create account', tasks: 'Tasks', profile: 'Profile' };
+      const ROUTES = { '#register': 'register', '#home': 'tasks' };
+      const TITLES = { login: 'Sign in', register: 'Create account', tasks: 'Tasks' };
       function currentPath() { return location.hash || ''; }
       function navigate(path, replace) {
         const url = path === '#login'
@@ -956,7 +909,7 @@
       function render() {
         const route = currentPath() ? ROUTES[currentPath()] : 'login';
         const signedIn = Boolean(currentUser);
-        const protectedRoute = route === 'tasks' || route === 'profile';
+        const protectedRoute = route === 'tasks';
         // Unknown path, protected page without a session, or login/register while signed in: redirect.
         if (!route || (protectedRoute && !signedIn) || (!protectedRoute && signedIn)) {
           navigate(signedIn ? '#home' : '#login', true);
@@ -966,8 +919,6 @@
         authScreen.hidden = protectedRoute;
         header.hidden = !protectedRoute;
         tasksView.hidden = route !== 'tasks';
-        profileView.hidden = route !== 'profile';
-        if (route === 'profile') fillProfile();
         if (!protectedRoute) setMode(route);
       }
       function signIn(identifier) {
@@ -982,16 +933,6 @@
         deleteCookie(SESSION_COOKIE);
         form.reset();
         navigate('#login');
-      }
-
-      function fillProfile() {
-        if (!currentUser) return;
-        $('#profile-name').value = DEMO_USER.name;
-        $('#profile-username').value = DEMO_USER.username;
-        $('#profile-email').value = DEMO_USER.email;
-        $('#profile-avatar').textContent = DEMO_USER.name.charAt(0).toUpperCase();
-        $('#profile-summary-name').textContent = DEMO_USER.name;
-        $('#profile-summary-meta').textContent = `@${DEMO_USER.username} · ${DEMO_USER.email}`;
       }
 
       // ---------- Accepted values shown under the form ----------
@@ -1036,8 +977,6 @@
 
       $('#auth-switch').addEventListener('click', () => navigate(mode === 'login' ? '#register' : '#login'));
       $('#logout-button').addEventListener('click', signOut);
-      $('#profile-button').addEventListener('click', () => navigate('#profile'));
-      $('#back-to-tasks').addEventListener('click', () => navigate('#home'));
       document.querySelectorAll('a.brand').forEach(link => link.addEventListener('click', event => {
         event.preventDefault();
         navigate(currentUser ? '#home' : '#login');
