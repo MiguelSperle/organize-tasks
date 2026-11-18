@@ -641,7 +641,6 @@
       </form>
       <ul class="accepted-values" id="accepted-values" aria-label="Accepted values"></ul>
       <button class="auth-switch" id="auth-switch" type="button">New here? Create an account</button>
-      <p class="auth-note">Demo only: access uses a fixed account defined in this page. This is not secure authentication and does not sync between devices.</p>
     </div>
   </section>
   <header class="topbar" hidden>
@@ -907,7 +906,9 @@
       };
 
       const SESSION_COOKIE = 'session-identifier';
-      const INVALID_MESSAGE = 'Invalid value. Use the accepted value shown below.';
+      // Usernames are stored in lowercase and cannot contain "@", so they never clash with emails.
+      const USERNAME_PATTERN = /^[a-z0-9._-]{3,20}$/;
+      const USERNAME_HINT = 'Use 3–20 characters: letters, numbers, dot, underscore or hyphen.';
 
       // ---------- Cookie helpers ----------
       function getCookie(name) {
@@ -1032,12 +1033,6 @@
         clearErrors(AUTH_ERROR_IDS);
       }
       function clearErrors(ids) { ids.forEach(id => { $('#' + id).textContent = ''; }); }
-      function showErrors(errors) {
-        clearErrors(AUTH_ERROR_IDS);
-        const fields = Object.keys(errors);
-        fields.forEach(field => { $('#auth-' + field + '-error').textContent = errors[field]; });
-        $('#auth-' + fields[0]).focus();
-      }
 
       $('#auth-switch').addEventListener('click', () => navigate(mode === 'login' ? '#register' : '#login'));
       $('#logout-button').addEventListener('click', signOut);
@@ -1050,25 +1045,26 @@
 
       form.addEventListener('submit', event => {
         event.preventDefault();
-        const message = $('#auth-message');
-        message.textContent = '';
-        message.classList.remove('success');
+        const message = $('#auth-message'); message.textContent = ''; message.classList.remove('success');
         clearErrors(AUTH_ERROR_IDS);
-
+        const fail = (field, text) => { $('#auth-' + field + '-error').textContent = text; $('#auth-' + field).focus(); };
         const password = $('#auth-password').value;
-        const errors = {};
+        const WRONG = 'Email, username or password is incorrect.';
 
         if (mode === 'register') {
           const name = $('#auth-name').value.trim();
           const username = $('#auth-username').value.trim().toLowerCase();
-          const email = $('#auth-email').value.trim().toLowerCase();
-
-          if (name !== DEMO_USER.name) errors.name = INVALID_MESSAGE;
-          if (username !== DEMO_USER.username) errors.username = INVALID_MESSAGE;
-          if (email !== DEMO_USER.email) errors.email = INVALID_MESSAGE;
-          if (password !== DEMO_USER.password) errors.password = INVALID_MESSAGE;
-
-          if (Object.keys(errors).length) { showErrors(errors); return; }
+          const emailInput = $('#auth-email');
+          const email = emailInput.value.trim().toLowerCase();
+          if (!name) return fail('name', 'Enter your name.');
+          if (!USERNAME_PATTERN.test(username)) return fail('username', USERNAME_HINT);
+          if (!email || !emailInput.validity.valid) return fail('email', 'Enter a valid email address.');
+          if (!password) return fail('password', 'Enter a password.');
+          if (password.length < 8) return fail('password', 'Use a password with at least 8 characters.');
+          if (name !== DEMO_USER.name || username !== DEMO_USER.username || email !== DEMO_USER.email || password !== DEMO_USER.password) {
+            message.textContent = WRONG;
+            return;
+          }
 
           // Accepted only with the predefined values. Send the person to the login screen.
           form.reset();
@@ -1079,18 +1075,16 @@
           return;
         }
 
-        const identifier = $('#auth-identifier').value.trim();
-        if (!isValidIdentifier(identifier)) errors.identifier = INVALID_MESSAGE;
-        if (password !== DEMO_USER.password) errors.password = INVALID_MESSAGE;
-
-        if (Object.keys(errors).length) {
-          showErrors(errors);
-          message.textContent = 'Email, username or password is incorrect.';
+        const identifier = $('#auth-identifier').value.trim().toLowerCase();
+        if (!identifier) return fail('identifier', 'Enter your email or username.');
+        if (!password) return fail('password', 'Enter a password.');
+        if (!isValidIdentifier(identifier) || password !== DEMO_USER.password) {
+          message.textContent = WRONG;
           return;
         }
 
         form.reset();
-        signIn(identifier.toLowerCase());
+        signIn(identifier);
       });
 
       // The tasks script reads the signed-in user's stable id from here.
