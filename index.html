@@ -538,6 +538,7 @@
     .auth-message { min-height: 18px; margin-top: 0; color: #c43e3e; font-size: 12px; }
     .registration-message { min-height: 18px; margin-top: 0; color: #c43e3e; font-size: 12px; }
     .auth-message.success { color: #238a58; font-weight: 600; }
+    #success-message { min-height: 0; margin-top: -6px; }
     .auth-note { margin-top: 18px !important; padding: 10px; border-radius: 7px; background: #f6f8fc; font-size: 11px !important; }
     .accepted-values { margin: 18px 0 0; padding: 12px; border-radius: 7px; background: #f6f8fc; font-size: 11px; color: #758198; list-style: none; }
     .accepted-values li { margin: 5px 0; }
@@ -1026,7 +1027,7 @@
 
           // Accepted only with the predefined values. Stay on the registration screen and confirm there.
           form.reset();
-          successMessage.textContent = 'Account created successfully! Use “Already have an account? Sign in” to continue.';
+          successMessage.textContent = 'Account created successfully!';
           successMessage.hidden = false;
           $('#auth-name').focus();
           return;
