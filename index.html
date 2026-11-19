@@ -531,13 +531,11 @@
     .auth-card > p { margin: 0 0 20px; color: #7d899d; font-size: 13px; line-height: 1.5; }
     .auth-card label { display: block; color: #445169; font-size: 12px; font-weight: 600; margin: 14px 0 6px; }
     .auth-card input { width: 100%; font: 13px 'DM Sans', sans-serif; color: #354158; border: 1px solid #e2e7ef; border-radius: 7px; padding: 11px 10px; }
+    .auth-card input[aria-invalid="true"] { border-color: #c43e3e; }
     .auth-card button[type="submit"] { width: 100%; margin-top: 18px; }
     .auth-switch { border: 0; background: none; color: var(--blue); cursor: pointer; font: 600 12px 'DM Sans', sans-serif; padding: 12px 0 0; width: 100%; }
     .auth-message { min-height: 18px; margin-top: 12px; color: #c43e3e; font-size: 12px; }
     .auth-message.success { color: #238a58; font-weight: 600; }
-    .auth-field-error { display: block; min-height: 0; margin-top: 4px; color: #c43e3e; font-size: 11px; }
-    .auth-card .auth-field-error { min-height: 0; margin: 0 0 5px; line-height: 1.25; }
-    .auth-card .auth-field-error:not(:empty) { padding: 4px; }
     .auth-note { margin-top: 18px !important; padding: 10px; border-radius: 7px; background: #f6f8fc; font-size: 11px !important; }
     .accepted-values { margin: 18px 0 0; padding: 12px; border-radius: 7px; background: #f6f8fc; font-size: 11px; color: #758198; list-style: none; }
     .accepted-values li { margin: 5px 0; }
@@ -607,28 +605,23 @@
         <div id="auth-name-field" hidden>
 
           <input id="auth-name" name="name" aria-label="Name" autocomplete="off" maxlength="80" placeholder="Name">
-          <small class="auth-field-error" id="auth-name-error" data-testid="auth-field-error" data-field="name" aria-live="polite"></small>
         </div>
         <div id="auth-username-field" hidden>
 
           <input id="auth-username" name="username" aria-label="Username" autocomplete="off" maxlength="20" placeholder="Username">
-          <small class="auth-field-error" id="auth-username-error" data-testid="auth-field-error" data-field="username" aria-live="polite"></small>
         </div>
         <div id="auth-identifier-field">
 
           <input id="auth-identifier" name="identifier" aria-label="Email or Username" autocomplete="off" maxlength="254" placeholder="Email or Username">
-          <small class="auth-field-error" id="auth-identifier-error" data-testid="auth-field-error" data-field="identifier" aria-live="polite"></small>
         </div>
         <div id="auth-email-field" hidden>
 
           <input id="auth-email" name="email" aria-label="Email" type="email" autocomplete="off" maxlength="254" placeholder="Email">
-          <small class="auth-field-error" id="auth-email-error" data-testid="auth-field-error" data-field="email" aria-live="polite"></small>
         </div>
 
         <input id="auth-password" name="password" aria-label="Password" type="password" autocomplete="off" required minlength="8" placeholder="Password">
-        <small class="auth-field-error" id="auth-password-error" data-testid="auth-field-error" data-field="password" aria-live="polite"></small>
         <button class="button button-primary" id="auth-submit" type="submit">Sign in</button>
-        <div class="auth-message" id="auth-message" data-testid="auth-message" role="status" aria-live="polite"></div>
+        <div class="auth-message" id="auth-message" data-testid="auth-error-message" role="status" aria-live="polite"></div>
       </form>
       <ul class="accepted-values" id="accepted-values" aria-label="Accepted values"></ul>
       <button class="auth-switch" id="auth-switch" type="button">New here? Create an account</button>
@@ -883,7 +876,7 @@
       const header = $('header');
       const tasksView = $('#home');
       const form = $('#auth-form');
-      const AUTH_ERROR_IDS = ['name', 'username', 'identifier', 'email', 'password'].map(f => `auth-${f}-error`);
+      const message = $('#auth-message');
 
       let mode = 'login';
       let currentUser = null;
@@ -969,11 +962,14 @@
         $('#auth-identifier').required = !registering;
         $('#auth-password').autocomplete = registering ? 'new-password' : 'current-password';
         renderAcceptedValues(registering);
-        $('#auth-message').textContent = '';
-        $('#auth-message').classList.remove('success');
-        clearErrors(AUTH_ERROR_IDS);
+        clearMessage();
       }
-      function clearErrors(ids) { ids.forEach(id => { $('#' + id).textContent = ''; }); }
+
+      function clearMessage() {
+        message.textContent = '';
+        message.classList.remove('success');
+        form.querySelectorAll('input[aria-invalid="true"]').forEach(input => input.removeAttribute('aria-invalid'));
+      }
 
       $('#auth-switch').addEventListener('click', () => navigate(mode === 'login' ? '#register' : '#login'));
       $('#logout-button').addEventListener('click', signOut);
@@ -984,9 +980,14 @@
 
       form.addEventListener('submit', event => {
         event.preventDefault();
-        const message = $('#auth-message'); message.textContent = ''; message.classList.remove('success');
-        clearErrors(AUTH_ERROR_IDS);
-        const fail = (field, text) => { $('#auth-' + field + '-error').textContent = text; $('#auth-' + field).focus(); };
+        clearMessage();
+        const fail = (field, text) => {
+          message.textContent = text;
+          message.classList.remove('success');
+          const input = $('#auth-' + field);
+          input.setAttribute('aria-invalid', 'true');
+          input.focus();
+        };
         const password = $('#auth-password').value;
         const WRONG = 'Email, username or password is incorrect.';
 
