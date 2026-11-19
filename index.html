@@ -538,7 +538,8 @@
     .auth-message { min-height: 18px; margin-top: 0; color: #c43e3e; font-size: 12px; }
     .registration-message { min-height: 18px; margin-top: 0; color: #c43e3e; font-size: 12px; }
     .auth-message.success { color: #238a58; font-weight: 600; }
-    #success-message { min-height: 0; margin-top: -12px; }
+    #success-message { min-height: 0; margin-top: -18px; }
+    #auth-form:has(#success-message:not([hidden])) { row-gap: 4px; }
     .auth-note { margin-top: 18px !important; padding: 10px; border-radius: 7px; background: #f6f8fc; font-size: 11px !important; }
     .accepted-values { margin: 18px 0 0; padding: 12px; border-radius: 7px; background: #f6f8fc; font-size: 11px; color: #758198; list-style: none; }
     .accepted-values li { margin: 5px 0; }
