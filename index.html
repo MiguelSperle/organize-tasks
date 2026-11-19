@@ -622,7 +622,8 @@
 
         <input id="auth-password" name="password" aria-label="Password" type="password" autocomplete="off" required minlength="8" placeholder="Password">
         <button class="button button-primary" id="auth-submit" type="submit">Sign in</button>
-        <div class="auth-message" id="auth-message" data-testid="auth-error-message" role="status" aria-live="polite"></div>
+        <div class="auth-message" id="login-message" data-testid="auth-login-error-message" role="status" aria-live="polite"></div>
+        <div class="auth-message" id="register-message" data-testid="auth-register-error-message" role="status" aria-live="polite" hidden></div>
       </form>
       <ul class="accepted-values" id="accepted-values" aria-label="Accepted values"></ul>
       <button class="auth-switch" id="auth-switch" type="button">New here? Create an account</button>
@@ -877,10 +878,16 @@
       const header = $('header');
       const tasksView = $('#home');
       const form = $('#auth-form');
-      const message = $('#auth-message');
+      const loginMessage = $('#login-message');
+      const registerMessage = $('#register-message');
 
       let mode = 'login';
       let currentUser = null;
+
+      // Message area for the current mode: login and registration each have their own.
+      function activeMessage() {
+        return mode === 'register' ? registerMessage : loginMessage;
+      }
 
       // ---------- Validation against the predefined account ----------
       function isValidIdentifier(value) {
@@ -962,13 +969,17 @@
         $('#auth-email').required = registering;
         $('#auth-identifier').required = !registering;
         $('#auth-password').autocomplete = registering ? 'new-password' : 'current-password';
+        loginMessage.hidden = registering;
+        registerMessage.hidden = !registering;
         renderAcceptedValues(registering);
         clearMessage();
       }
 
       function clearMessage() {
-        message.textContent = '';
-        message.classList.remove('success');
+        [loginMessage, registerMessage].forEach(el => {
+          el.textContent = '';
+          el.classList.remove('success');
+        });
         form.querySelectorAll('input[aria-invalid="true"]').forEach(input => input.removeAttribute('aria-invalid'));
       }
 
@@ -982,6 +993,7 @@
       form.addEventListener('submit', event => {
         event.preventDefault();
         clearMessage();
+        const message = activeMessage();
         const fail = (field, text) => {
           message.textContent = text;
           message.classList.remove('success');
@@ -1010,8 +1022,10 @@
           // Accepted only with the predefined values. Send the person to the login screen.
           form.reset();
           navigate('#login', true);
-          message.textContent = 'Account created successfully! Sign in to continue.';
-          message.classList.add('success');
+          // After navigating, the active message area is the login one.
+          const successMessage = activeMessage();
+          successMessage.textContent = 'Account created successfully! Sign in to continue.';
+          successMessage.classList.add('success');
           $('#auth-identifier').focus();
           return;
         }
