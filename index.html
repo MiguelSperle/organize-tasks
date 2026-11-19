@@ -1024,13 +1024,11 @@
             return;
           }
 
-          // Accepted only with the predefined values. Send the person to the login screen.
+          // Accepted only with the predefined values. Stay on the registration screen and confirm there.
           form.reset();
-          navigate('#login', true);
-          // Shown after navigating, in its own area, so it never appears in the login error message.
-          successMessage.textContent = 'Account created successfully! Sign in to continue.';
+          successMessage.textContent = 'Account created successfully! Use “Already have an account? Sign in” to continue.';
           successMessage.hidden = false;
-          $('#auth-identifier').focus();
+          $('#auth-name').focus();
           return;
         }
 
