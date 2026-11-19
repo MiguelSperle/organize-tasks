@@ -545,6 +545,7 @@
     .accepted-values li { margin: 5px 0; }
     .accepted-values strong { color: #445169; font-weight: 600; }
     .account-controls { display: flex; gap: 10px; align-items: center; }
+    .user-name { color: #445169; font-size: 13px; font-weight: 600; }
 
     @media (max-width: 500px) { .auth-card { padding: 22px; } .local-badge { display: none; } }
 
@@ -639,7 +640,7 @@
         <span class="brand-mark">✓</span>
         <span>Organize<span class="brand-light">Tasks</span></span>
       </a>
-      <div class="account-controls"><button class="button button-secondary" id="logout-button" type="button">Log out</button><span class="local-badge"><span class="dot"></span> Saved on this device</span></div>
+      <div class="account-controls"><span class="user-name" id="user-name"></span><button class="button button-secondary" id="logout-button" type="button">Log out</button><span class="local-badge"><span class="dot"></span> Saved on this device</span></div>
     </div>
   </header>
 
@@ -925,6 +926,7 @@
         authScreen.hidden = protectedRoute;
         header.hidden = !protectedRoute;
         tasksView.hidden = route !== 'tasks';
+        $('#user-name').textContent = protectedRoute && currentUser ? currentUser.name : '';
         if (!protectedRoute) setMode(route);
       }
       function signIn(identifier) {
