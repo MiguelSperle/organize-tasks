@@ -625,6 +625,7 @@
         <button class="button button-primary" id="auth-submit" type="submit">Sign in</button>
         <div class="auth-message" id="login-message" data-testid="auth-error-message" role="status" aria-live="polite"></div>
         <div class="registration-message" id="register-message" data-testid="registration-error-message" role="status" aria-live="polite" hidden></div>
+        <div class="auth-message success" id="success-message" data-testid="registration-success-message" role="status" aria-live="polite" hidden></div>
       </form>
       <ul class="accepted-values" id="accepted-values" aria-label="Accepted values"></ul>
       <button class="auth-switch" id="auth-switch" type="button">New here? Create an account</button>
@@ -881,6 +882,7 @@
       const form = $('#auth-form');
       const loginMessage = $('#login-message');
       const registerMessage = $('#register-message');
+      const successMessage = $('#success-message');
 
       let mode = 'login';
       let currentUser = null;
@@ -981,6 +983,8 @@
           el.textContent = '';
           el.classList.remove('success');
         });
+        successMessage.textContent = '';
+        successMessage.hidden = true;
         form.querySelectorAll('input[aria-invalid="true"]').forEach(input => input.removeAttribute('aria-invalid'));
       }
 
@@ -1023,10 +1027,9 @@
           // Accepted only with the predefined values. Send the person to the login screen.
           form.reset();
           navigate('#login', true);
-          // After navigating, the active message area is the login one.
-          const successMessage = activeMessage();
+          // Shown after navigating, in its own area, so it never appears in the login error message.
           successMessage.textContent = 'Account created successfully! Sign in to continue.';
-          successMessage.classList.add('success');
+          successMessage.hidden = false;
           $('#auth-identifier').focus();
           return;
         }
