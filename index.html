@@ -536,6 +536,7 @@
     .auth-card button[type="submit"] { width: 100%; margin-top: 6px; }
     .auth-switch { border: 0; background: none; color: var(--blue); cursor: pointer; font: 600 12px 'DM Sans', sans-serif; padding: 12px 0 0; width: 100%; }
     .auth-message { min-height: 18px; margin-top: 0; color: #c43e3e; font-size: 12px; }
+    .registration-message { min-height: 18px; margin-top: 0; color: #c43e3e; font-size: 12px; }
     .auth-message.success { color: #238a58; font-weight: 600; }
     .auth-note { margin-top: 18px !important; padding: 10px; border-radius: 7px; background: #f6f8fc; font-size: 11px !important; }
     .accepted-values { margin: 18px 0 0; padding: 12px; border-radius: 7px; background: #f6f8fc; font-size: 11px; color: #758198; list-style: none; }
@@ -623,7 +624,7 @@
         <input id="auth-password" name="password" aria-label="Password" type="password" autocomplete="off" required minlength="8" placeholder="Password">
         <button class="button button-primary" id="auth-submit" type="submit">Sign in</button>
         <div class="auth-message" id="login-message" data-testid="auth-error-message" role="status" aria-live="polite"></div>
-        <div class="auth-message" id="register-message" data-testid="register-error-message" role="status" aria-live="polite" hidden></div>
+        <div class="registration-message" id="register-message" data-testid="registration-error-message" role="status" aria-live="polite" hidden></div>
       </form>
       <ul class="accepted-values" id="accepted-values" aria-label="Accepted values"></ul>
       <button class="auth-switch" id="auth-switch" type="button">New here? Create an account</button>
