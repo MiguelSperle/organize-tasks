@@ -538,7 +538,6 @@
     .auth-message { min-height: 18px; margin-top: 0; color: #c43e3e; font-size: 12px; }
     .registration-message { min-height: 18px; margin-top: 0; color: #c43e3e; font-size: 12px; }
     .auth-message.success { color: #238a58; font-weight: 600; }
-    #success-message { min-height: 0; margin-top: -18px; }
     .auth-note { margin-top: 18px !important; padding: 10px; border-radius: 7px; background: #f6f8fc; font-size: 11px !important; }
     .accepted-values { margin: 18px 0 0; padding: 12px; border-radius: 7px; background: #f6f8fc; font-size: 11px; color: #758198; list-style: none; }
     .accepted-values li { margin: 5px 0; }
@@ -976,7 +975,6 @@
         $('#auth-identifier').required = !registering;
         $('#auth-password').autocomplete = registering ? 'new-password' : 'current-password';
         loginMessage.hidden = registering;
-        registerMessage.hidden = !registering;
         renderAcceptedValues(registering);
         clearMessage();
       }
@@ -986,6 +984,8 @@
           el.textContent = '';
           el.classList.remove('success');
         });
+        // The registration message area is shown only in registration mode; the success message takes its place after a successful registration.
+        registerMessage.hidden = mode !== 'register';
         successMessage.textContent = '';
         successMessage.hidden = true;
         form.querySelectorAll('input[aria-invalid="true"]').forEach(input => input.removeAttribute('aria-invalid'));
@@ -1027,8 +1027,9 @@
             return;
           }
 
-          // Accepted only with the predefined values. Stay on the registration screen and confirm there.
+          // Accepted only with the predefined values. Show the success message in the same slot as the error messages.
           form.reset();
+          registerMessage.hidden = true;
           successMessage.textContent = 'Registered successfully';
           successMessage.hidden = false;
           $('#auth-name').focus();
