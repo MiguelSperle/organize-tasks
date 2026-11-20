@@ -605,7 +605,7 @@
     <div class="auth-card">
       <a class="brand" href="/" aria-label="Organize Tasks, home"><span class="brand-mark">✓</span><span>Organize<span class="brand-light">Tasks</span></span></a>
       <h1 id="auth-title" style="margin-top:22px">Authentication</h1>
-      <p id="auth-description">Sign in with your email or username to manage your tasks in this browser.</p>
+      <p id="auth-description" hidden></p>
       <form id="auth-form" autocomplete="off" novalidate>
         <div id="auth-name-field" hidden>
 
@@ -964,7 +964,7 @@
         mode = next; const registering = mode === 'register';
         if (changed) form.reset(); // clear every field (including the password) when switching between authentication and registration
         $('#auth-title').textContent = registering ? 'Registration' : 'Authentication';
-        $('#auth-description').textContent = registering ? 'Create an account to start organizing your tasks.' : 'Sign in with your email or username to manage your tasks in this browser.';
+        $('#auth-description').hidden = true;
         $('#auth-submit').textContent = registering ? 'Register' : 'Authenticate';
         $('#auth-switch').textContent = registering ? 'Already have an account? Authenticate' : 'New here? Register';
         $('#auth-name-field').hidden = !registering;
