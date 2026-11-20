@@ -631,7 +631,7 @@
         <div class="auth-message success" id="success-message" data-testid="registration-success-message" role="status" aria-live="polite" hidden></div>
       </form>
       <ul class="accepted-values" id="accepted-values" aria-label="Accepted values"></ul>
-      <button class="auth-switch" id="auth-switch" type="button">New here? Register</button>
+      <button class="auth-switch" id="auth-switch" type="button">Need an account? Go to Registration</button>
     </div>
   </section>
   <header class="topbar" hidden>
@@ -966,7 +966,7 @@
         $('#auth-title').textContent = registering ? 'Registration' : 'Authentication';
         $('#auth-description').hidden = true;
         $('#auth-submit').textContent = registering ? 'Register' : 'Authenticate';
-        $('#auth-switch').textContent = registering ? 'Already have an account? Authenticate' : 'New here? Register';
+        $('#auth-switch').textContent = registering ? 'Go to Authentication' : 'Go to Registration';
         $('#auth-name-field').hidden = !registering;
         $('#auth-username-field').hidden = !registering;
         $('#auth-email-field').hidden = !registering;
