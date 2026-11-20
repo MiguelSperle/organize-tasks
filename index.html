@@ -760,11 +760,11 @@
       };
 
       function normalizeTask(input) {
-        if (!input || typeof input !== 'object') throw new TypeError('Invalid task.');
+        if (!input || typeof input !== 'object') throw new TypeError('Invalid task');
 
         const title = String(input.title ?? '').trim();
-        if (!title) throw new Error('Enter a title for the task.');
-        if (title.length > 100) throw new Error('The title must be at most 100 characters.');
+        if (!title) throw new Error('Enter a title for the task');
+        if (title.length > 100) throw new Error('The title must be at most 100 characters');
 
         const rawStatus = LEGACY_STATUSES[input.status] || input.status;
         const status = STATUSES.includes(rawStatus) ? rawStatus : 'Pending';
@@ -860,7 +860,7 @@
       const SESSION_COOKIE = 'session-identifier';
       // Usernames are stored in lowercase and cannot contain "@", so they never clash with emails.
       const USERNAME_PATTERN = /^[a-z0-9._-]{3,20}$/;
-      const USERNAME_HINT = 'Use 3–20 characters: letters, numbers, dot, underscore or hyphen.';
+      const USERNAME_HINT = 'Use 3–20 characters: letters, numbers, dot, underscore or hyphen';
 
       // ---------- Cookie helpers ----------
       function getCookie(name) {
@@ -1010,18 +1010,18 @@
           input.focus();
         };
         const password = $('#auth-password').value;
-        const WRONG = 'Incorrect credentials.';
+        const WRONG = 'Incorrect credentials';
 
         if (mode === 'register') {
           const name = $('#auth-name').value.trim();
           const username = $('#auth-username').value.trim().toLowerCase();
           const emailInput = $('#auth-email');
           const email = emailInput.value.trim().toLowerCase();
-          if (!name) return fail('name', 'Enter your name.');
+          if (!name) return fail('name', 'Enter your name');
           if (!USERNAME_PATTERN.test(username)) return fail('username', USERNAME_HINT);
-          if (!email || !emailInput.validity.valid) return fail('email', 'Enter a valid email address.');
-          if (!password) return fail('password', 'Enter a password.');
-          if (password.length < 8) return fail('password', 'Use a password with at least 8 characters.');
+          if (!email || !emailInput.validity.valid) return fail('email', 'Enter a valid email address');
+          if (!password) return fail('password', 'Enter a password');
+          if (password.length < 8) return fail('password', 'Use a password with at least 8 characters');
           if (name !== DEMO_USER.name || username !== DEMO_USER.username || email !== DEMO_USER.email || password !== DEMO_USER.password) {
             message.textContent = WRONG;
             return;
@@ -1030,15 +1030,15 @@
           // Accepted only with the predefined values. Show the success message in the same slot as the error messages.
           form.reset();
           registerMessage.hidden = true;
-          successMessage.textContent = 'Registered successfully.';
+          successMessage.textContent = 'Registered successfully';
           successMessage.hidden = false;
           $('#auth-name').focus();
           return;
         }
 
         const identifier = $('#auth-identifier').value.trim().toLowerCase();
-        if (!identifier) return fail('identifier', 'Enter your email or username.');
-        if (!password) return fail('password', 'Enter a password.');
+        if (!identifier) return fail('identifier', 'Enter your email or username');
+        if (!password) return fail('password', 'Enter a password');
         if (!isValidIdentifier(identifier) || password !== DEMO_USER.password) {
           message.textContent = WRONG;
           return;
@@ -1085,7 +1085,7 @@
         },
         setItem(key, value) {
           const id = window.TaskDemoAuth.id;
-          if (!id) throw new Error('Sign in is required.');
+          if (!id) throw new Error('Sign in is required');
           window.localStorage.setItem(`${key}:${id}`, value);
         }
       };
@@ -1106,7 +1106,7 @@
 
       function persist() {
         if (!core.writeTasks(storage, tasks)) {
-          showToast('Could not save. Check your browser storage space.');
+          showToast('Could not save. Check your browser storage space');
         }
       }
 
