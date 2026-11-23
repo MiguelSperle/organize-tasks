@@ -858,9 +858,6 @@
       };
 
       const SESSION_COOKIE = 'session-identifier';
-      // Usernames are stored in lowercase and cannot contain "@", so they never clash with emails.
-      const USERNAME_PATTERN = /^[a-z0-9._-]{3,20}$/;
-      const USERNAME_HINT = 'Use 3–20 characters: letters, numbers, dot, underscore or hyphen';
 
       // ---------- Cookie helpers ----------
       function getCookie(name) {
@@ -1032,7 +1029,6 @@
           // Some fields filled: specific messages
           if (!name) return fail('name', 'Enter your name');
           if (!username) return fail('username', 'Enter your username');
-          if (!USERNAME_PATTERN.test(username)) return fail('username', USERNAME_HINT);
           if (!email) return fail('email', 'Enter your email');
           if (!emailInput.validity.valid) return fail('email', 'Enter a valid email address');
           if (!password) return fail('password', 'Enter a password');
