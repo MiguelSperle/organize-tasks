@@ -1034,7 +1034,7 @@
           if (!password) return fail('password', 'Enter a password');
           if (password.length < 8) return fail('password', 'Use a password with at least 8 characters');
           if (name !== DEMO_USER.name || username !== DEMO_USER.username || email !== DEMO_USER.email || password !== DEMO_USER.password) {
-            message.textContent = 'Registration only accepts the data shown below';
+            message.textContent = 'Registration only accepts the user data shown below';
             return;
           }
 
