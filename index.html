@@ -1009,6 +1009,12 @@
           input.setAttribute('aria-invalid', 'true');
           input.focus();
         };
+        const failEmpty = fields => {
+          message.textContent = 'Please fill in the fields';
+          message.classList.remove('success');
+          fields.forEach(field => $('#auth-' + field).setAttribute('aria-invalid', 'true'));
+          $('#auth-' + fields[0]).focus();
+        };
         const password = $('#auth-password').value;
         const WRONG = 'Incorrect credentials';
 
@@ -1017,6 +1023,13 @@
           const username = $('#auth-username').value.trim().toLowerCase();
           const emailInput = $('#auth-email');
           const email = emailInput.value.trim().toLowerCase();
+
+          // All fields empty: generic message
+          if (!name && !username && !email && !password) {
+            return failEmpty(['name', 'username', 'email', 'password']);
+          }
+
+          // Some fields filled: specific messages
           if (!name) return fail('name', 'Enter your name');
           if (!USERNAME_PATTERN.test(username)) return fail('username', USERNAME_HINT);
           if (!email || !emailInput.validity.valid) return fail('email', 'Enter a valid email address');
@@ -1037,6 +1050,11 @@
         }
 
         const identifier = $('#auth-identifier').value.trim().toLowerCase();
+
+        // All fields empty: generic message
+        if (!identifier && !password) return failEmpty(['identifier', 'password']);
+
+        // Some fields filled: specific messages
         if (!identifier) return fail('identifier', 'Enter your email or username');
         if (!password) return fail('password', 'Enter a password');
         if (!isValidIdentifier(identifier) || password !== DEMO_USER.password) {
