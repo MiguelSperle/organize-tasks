@@ -1031,6 +1031,7 @@
 
           // Some fields filled: specific messages
           if (!name) return fail('name', 'Enter your name');
+          if (!username) return fail('username', 'Enter your username');
           if (!USERNAME_PATTERN.test(username)) return fail('username', USERNAME_HINT);
           if (!email || !emailInput.validity.valid) return fail('email', 'Enter a valid email address');
           if (!password) return fail('password', 'Enter a password');
