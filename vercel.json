@@ -1,7 +1,7 @@
 {
   "rewrites": [
+    { "source": "/", "destination": "/index.html" },
     { "source": "/register", "destination": "/index.html" },
-    { "source": "/manager", "destination": "/index.html" },
-    { "source": "/login", "destination": "/index.html" }
+    { "source": "/manage-tasks", "destination": "/index.html" }
   ]
 }
