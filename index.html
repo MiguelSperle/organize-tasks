@@ -634,7 +634,7 @@
   </section>
   <header class="topbar" hidden>
     <div class="wrap topbar-inner">
-      <a class="brand" id="brand-link" href="/manager" aria-label="Organize Tasks, home">
+      <a class="brand" id="brand-link" href="/management" aria-label="Organize Tasks, home">
         <span class="brand-mark">✓</span>
         <span>Organize<span class="brand-light">Tasks</span></span>
       </a>
@@ -897,7 +897,7 @@
       }
 
       // ---------- Path routing ----------
-      const ROUTES = { '/register': 'register', '/manager': 'tasks' };
+      const ROUTES = { '/register': 'register', '/management': 'tasks' };
       const TITLES = { login: 'Authentication', register: 'Registration', tasks: 'Tasks' };
       function currentPath() { return location.pathname.replace(/\/+$/, '') || '/'; }
       function navigate(path, replace) {
@@ -912,7 +912,7 @@
         const protectedRoute = route === 'tasks';
         // Unknown path, protected page without a session, or login/register while signed in: redirect.
         if (!route || (protectedRoute && !signedIn) || (!protectedRoute && signedIn)) {
-          navigate(signedIn ? '/manager' : '/', true);
+          navigate(signedIn ? '/management' : '/', true);
           return;
         }
         document.title = `${TITLES[route]} · Organize Tasks`;
@@ -927,7 +927,7 @@
         // The session cookie keeps the value the person signed in with: email or username.
         setCookie(SESSION_COOKIE, identifier);
         window.dispatchEvent(new Event('task-tracker-auth-changed'));
-        navigate('/manager');
+        navigate('/management');
       }
       function signOut() {
         currentUser = null;
@@ -990,7 +990,7 @@
       $('#logout-button').addEventListener('click', signOut);
       document.querySelectorAll('a.brand').forEach(link => link.addEventListener('click', event => {
         event.preventDefault();
-        navigate(currentUser ? '/manager' : '/');
+        navigate(currentUser ? '/management' : '/');
       }));
       window.addEventListener('popstate', render);
 
