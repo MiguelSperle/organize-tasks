@@ -634,7 +634,7 @@
   </section>
   <header class="topbar" hidden>
     <div class="wrap topbar-inner">
-      <a class="brand" id="brand-link" href="/manager" aria-label="Organize Tasks, home">
+      <a class="brand" id="brand-link" href="/manage-tasks" aria-label="Organize Tasks, home">
         <span class="brand-mark">✓</span>
         <span>Organize<span class="brand-light">Tasks</span></span>
       </a>
@@ -897,7 +897,7 @@
       }
 
       // ---------- Path routing ----------
-      const ROUTES = { '/register': 'register', '/manager': 'tasks' };
+      const ROUTES = { '/register': 'register', '/manage-tasks': 'tasks' };
       const TITLES = { login: 'Authentication', register: 'Registration', tasks: 'Tasks' };
       function currentPath() {
         return location.pathname.replace(/\/+$/, '') || '/';
@@ -916,7 +916,7 @@
         const protectedRoute = route === 'tasks';
         // Unknown path, protected page without a session, or login/register while signed in: redirect.
         if (!route || (protectedRoute && !signedIn) || (!protectedRoute && signedIn)) {
-          navigate(signedIn ? '/manager' : '/login', true);
+          navigate(signedIn ? '/manage-tasks' : '/login', true);
           return;
         }
         document.title = `${TITLES[route]} · Organize Tasks`;
@@ -931,7 +931,7 @@
         // The session cookie keeps the value the person signed in with: email or username.
         setCookie(SESSION_COOKIE, identifier);
         window.dispatchEvent(new Event('task-tracker-auth-changed'));
-        navigate('/manager');
+        navigate('/manage-tasks');
       }
       function signOut() {
         currentUser = null;
@@ -994,7 +994,7 @@
       $('#logout-button').addEventListener('click', signOut);
       document.querySelectorAll('a.brand').forEach(link => link.addEventListener('click', event => {
         event.preventDefault();
-        navigate(currentUser ? '/manager' : '/login');
+        navigate(currentUser ? '/manage-tasks' : '/login');
       }));
 
       form.addEventListener('submit', event => {
