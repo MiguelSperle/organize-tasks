@@ -1033,7 +1033,8 @@
           if (!name) return fail('name', 'Enter your name');
           if (!username) return fail('username', 'Enter your username');
           if (!USERNAME_PATTERN.test(username)) return fail('username', USERNAME_HINT);
-          if (!email || !emailInput.validity.valid) return fail('email', 'Enter a valid email address');
+          if (!email) return fail('email', 'Enter your email');
+          if (!emailInput.validity.valid) return fail('email', 'Enter a valid email address');
           if (!password) return fail('password', 'Enter a password');
           if (password.length < 8) return fail('password', 'Use a password with at least 8 characters');
           if (name !== DEMO_USER.name || username !== DEMO_USER.username || email !== DEMO_USER.email || password !== DEMO_USER.password) {
