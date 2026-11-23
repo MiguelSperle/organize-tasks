@@ -634,7 +634,7 @@
   </section>
   <header class="topbar" hidden>
     <div class="wrap topbar-inner">
-      <a class="brand" id="brand-link" href="#manager" aria-label="Organize Tasks, home">
+      <a class="brand" id="brand-link" href="/manager" aria-label="Organize Tasks, home">
         <span class="brand-mark">✓</span>
         <span>Organize<span class="brand-light">Tasks</span></span>
       </a>
@@ -896,25 +896,23 @@
         return wanted === DEMO_USER.email || wanted === DEMO_USER.username;
       }
 
-      // ---------- Hash routing ----------
-      const ROUTES = { '#register': 'register', '#manager': 'tasks' };
+      // ---------- Path routing ----------
+      const ROUTES = { '/register': 'register', '/manager': 'tasks' };
       const TITLES = { login: 'Authentication', register: 'Registration', tasks: 'Tasks' };
-      function currentPath() { return location.hash || ''; }
+      function currentPath() { return location.pathname.replace(/\/+$/, '') || '/'; }
       function navigate(path, replace) {
-        const url = path === '#login'
-          ? `${location.pathname}${location.search}`
-          : `${location.pathname}${location.search}${path}`;
-        if (replace) history.replaceState(null, '', url);
-        else if (`${location.pathname}${location.search}${location.hash}` !== url) history.pushState(null, '', url);
+        if (replace) history.replaceState(null, '', path);
+        else if (currentPath() !== path) history.pushState(null, '', path);
         render();
       }
       function render() {
-        const route = currentPath() ? ROUTES[currentPath()] : 'login';
+        const path = currentPath();
+        const route = ROUTES[path] || (path === '/' ? 'login' : null);
         const signedIn = Boolean(currentUser);
         const protectedRoute = route === 'tasks';
         // Unknown path, protected page without a session, or login/register while signed in: redirect.
         if (!route || (protectedRoute && !signedIn) || (!protectedRoute && signedIn)) {
-          navigate(signedIn ? '#manager' : '#login', true);
+          navigate(signedIn ? '/manager' : '/', true);
           return;
         }
         document.title = `${TITLES[route]} · Organize Tasks`;
@@ -929,13 +927,13 @@
         // The session cookie keeps the value the person signed in with: email or username.
         setCookie(SESSION_COOKIE, identifier);
         window.dispatchEvent(new Event('task-tracker-auth-changed'));
-        navigate('#manager');
+        navigate('/manager');
       }
       function signOut() {
         currentUser = null;
         deleteCookie(SESSION_COOKIE);
         form.reset();
-        navigate('#login');
+        navigate('/');
       }
 
       // ---------- Accepted values shown under the form ----------
@@ -988,12 +986,13 @@
         form.querySelectorAll('input[aria-invalid="true"]').forEach(input => input.removeAttribute('aria-invalid'));
       }
 
-      $('#auth-switch').addEventListener('click', () => navigate(mode === 'login' ? '#register' : '#login'));
+      $('#auth-switch').addEventListener('click', () => navigate(mode === 'login' ? '/register' : '/'));
       $('#logout-button').addEventListener('click', signOut);
       document.querySelectorAll('a.brand').forEach(link => link.addEventListener('click', event => {
         event.preventDefault();
-        navigate(currentUser ? '#manager' : '#login');
+        navigate(currentUser ? '/manager' : '/');
       }));
+      window.addEventListener('popstate', render);
 
       form.addEventListener('submit', event => {
         event.preventDefault();
@@ -1072,8 +1071,6 @@
       if (savedIdentifier && isValidIdentifier(savedIdentifier)) currentUser = DEMO_USER;
       else if (savedIdentifier) deleteCookie(SESSION_COOKIE);
 
-      window.addEventListener('hashchange', render);
-      window.addEventListener('popstate', render);
       render();
     })();
   </script>
