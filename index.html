@@ -702,7 +702,7 @@
 
       <div class="dialog-actions">
         <button class="button button-secondary" id="cancel-dialog" type="button">Cancel</button>
-        <button class="button button-primary" type="submit">Create task</button>
+        <button class="button button-primary" id="save-task-button" type="submit">Create task</button>
       </div>
     </form>
   </dialog>
@@ -1209,6 +1209,7 @@
       function openNew() {
         clearForm();
         $('#dialog-title').textContent = 'New task';
+        $('#save-task-button').textContent = 'Create task';
         dialog.showModal();
         $('#title').focus();
       }
@@ -1216,6 +1217,7 @@
       function openEdit(task) {
         clearForm();
         $('#dialog-title').textContent = 'Edit task';
+        $('#save-task-button').textContent = 'Update task';
         $('#task-id').value = task.id;
         $('#title').value = task.title;
         $('#description').value = task.description;
