@@ -707,7 +707,7 @@
     </form>
   </dialog>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
 
   <script>
     (function (root) {
@@ -1165,7 +1165,7 @@
             tasks = core.upsertTask(tasks, { ...task, status: core.nextStatus(task.status) });
             persist();
             render();
-            showToast('Status updated.');
+            showToast('Status updated');
           });
 
           // Edit / delete actions
@@ -1186,7 +1186,7 @@
               tasks = core.deleteTask(tasks, task.id);
               persist();
               render();
-              showToast('Task deleted.');
+              showToast('Task deleted');
             }
           });
 
@@ -1247,7 +1247,7 @@
           persist();
           dialog.close();
           render();
-          showToast(input.id ? 'Task updated.' : 'Task created.');
+          showToast(input.id ? 'Task updated' : 'Task created');
         } catch (error) {
           $('#title-error').textContent = error.message;
           $('#title').focus();
