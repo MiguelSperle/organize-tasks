@@ -1047,26 +1047,29 @@
 
       const $ = selector => document.querySelector(selector);
       const core = window.TaskCore;
-      const LEGACY_STORAGE_KEY = 'organiza-tarefas-v1';
+      const STORAGE_KEY = core.STORAGE_KEY;
+      // Keys used by earlier versions of the app; their data is moved to STORAGE_KEY once.
+      const LEGACY_KEYS = ['organiza-tarefas-v1:demo-user', 'tasks:demo-user'];
+
       const storage = {
         getItem(key) {
-          const id = window.TaskDemoAuth.id;
-          if (!id) return null;
-          const value = window.localStorage.getItem(`${key}:${id}`);
+          const value = window.localStorage.getItem(key);
           if (value !== null) return value;
 
-          // One-time migration from the old storage key
-          const legacy = window.localStorage.getItem(`${LEGACY_STORAGE_KEY}:${id}`);
-          if (legacy !== null) {
-            window.localStorage.setItem(`${key}:${id}`, legacy);
-            window.localStorage.removeItem(`${LEGACY_STORAGE_KEY}:${id}`);
+          // One-time migration from the older keys
+          for (const legacyKey of LEGACY_KEYS) {
+            const legacy = window.localStorage.getItem(legacyKey);
+            if (legacy !== null) {
+              window.localStorage.setItem(key, legacy);
+              LEGACY_KEYS.forEach(k => window.localStorage.removeItem(k));
+              return legacy;
+            }
           }
-          return legacy;
+          return null;
         },
         setItem(key, value) {
-          const id = window.TaskDemoAuth.id;
-          if (!id) throw new Error('Sign in is required');
-          window.localStorage.setItem(`${key}:${id}`, value);
+          if (!window.TaskDemoAuth.id) throw new Error('Sign in is required');
+          window.localStorage.setItem(key, value);
         }
       };
 
