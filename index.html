@@ -1128,6 +1128,7 @@
         visible.forEach(task => {
           const card = document.createElement('article');
           card.className = 'task-card';
+          card.dataset.testid = 'task-card';
 
           // Title and description
           const info = document.createElement('div');
