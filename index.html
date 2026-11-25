@@ -313,7 +313,7 @@
 
     .task-card {
       display: grid;
-      grid-template-columns: minmax(180px, 1fr) 125px 110px 120px auto;
+      grid-template-columns: minmax(180px, 1fr) 125px 120px auto;
       gap: 14px;
       align-items: center;
       padding: 15px 3px;
@@ -447,27 +447,21 @@
       cursor: pointer;
     }
 
-    form > label,
-    .form-row label {
-      display: block;
-      color: #445169;
-      font-size: 11px;
-      font-weight: 600;
-      margin: 12px 0 6px;
-    }
-
     .required {
       color: #d34f4f;
     }
 
-    form input,
-    form textarea,
-    form select {
+    /* Campos do formulário: sem labels visíveis, então o espaçamento vem daqui */
+    #task-form input:not([type="hidden"]),
+    #task-form textarea,
+    #task-form select {
+      display: block;
       width: 100%;
       font-size: 12px;
+      margin-top: 12px;
     }
 
-    form textarea {
+    #task-form textarea {
       resize: vertical;
     }
 
@@ -476,13 +470,7 @@
       min-height: 0;
       color: #c43e3e;
       font-size: 10px;
-      margin-top: 4px;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 13px;
+      margin-top: 12px;
     }
 
     .form-note {
@@ -583,10 +571,6 @@
       .card-actions {
         grid-column: 2;
         grid-row: 2;
-      }
-      .form-row {
-        grid-template-columns: 1fr;
-        gap: 0;
       }
       .section-heading {
         align-items: flex-start;
@@ -709,26 +693,17 @@
 
       <input type="hidden" id="task-id" autocomplete="off">
 
-      <label for="title">Title <span class="required">*</span></label>
-      <input id="title" name="title" maxlength="100" required placeholder="E.g.: Review documentation" autocomplete="off">
+      <input id="title" name="title" maxlength="100" required
+             placeholder="Title *" aria-label="Title" autocomplete="off">
       <small class="field-error" id="title-error" aria-live="polite"></small>
 
-      <label for="description">Description</label>
-      <textarea id="description" name="description" rows="3" maxlength="500" placeholder="Additional details (optional)"></textarea>
+      <textarea id="description" name="description" rows="3" maxlength="500"
+                placeholder="Description" aria-label="Description"></textarea>
 
-      <div class="form-row">
-        <div>
-          <label for="assignee">Assignee</label>
-          <input id="assignee" name="assignee" maxlength="80" placeholder="Assignee name" autocomplete="off">
-        </div>
-        <div>
-          <label for="due-date">Due date</label>
-          <input id="due-date" name="dueDate" type="date" autocomplete="off">
-        </div>
-      </div>
+      <input id="due-date" name="dueDate" type="date"
+             aria-label="Due date" autocomplete="off">
 
-      <label for="status">Status</label>
-      <select id="status" name="status">
+      <select id="status" name="status" aria-label="Status">
         <option>Pending</option>
         <option>In progress</option>
         <option>Completed</option>
@@ -773,7 +748,6 @@
           id: String(input.id || ''),
           title,
           description: String(input.description ?? '').trim().slice(0, 500),
-          assignee: String(input.assignee ?? '').trim().slice(0, 80),
           dueDate: String(input.dueDate ?? ''),
           status,
           createdAt: input.createdAt || new Date().toISOString()
@@ -1180,14 +1154,6 @@
             info.append(desc);
           }
 
-          // Assignee
-          const owner = document.createElement('div');
-          owner.className = 'task-meta';
-          owner.textContent = 'ASSIGNEE';
-          const ownerValue = document.createElement('b');
-          ownerValue.textContent = task.assignee || 'Not provided';
-          owner.append(ownerValue);
-
           // Due date
           const due = document.createElement('div');
           due.className = 'task-meta';
@@ -1235,7 +1201,7 @@
           });
 
           actions.append(edit, remove);
-          card.append(info, owner, due, status, actions);
+          card.append(info, due, status, actions);
           list.append(card);
         });
       }
@@ -1260,7 +1226,6 @@
         $('#task-id').value = task.id;
         $('#title').value = task.title;
         $('#description').value = task.description;
-        $('#assignee').value = task.assignee;
         $('#due-date').value = task.dueDate;
         $('#status').value = task.status;
         dialog.showModal();
@@ -1283,7 +1248,6 @@
           id: $('#task-id').value,
           title: $('#title').value,
           description: $('#description').value,
-          assignee: $('#assignee').value,
           dueDate: $('#due-date').value,
           status: $('#status').value
         };
