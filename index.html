@@ -1154,7 +1154,7 @@
           const dueValue = document.createElement('b');
           dueValue.textContent = task.dueDate
             ? new Date(`${task.dueDate}T12:00:00`).toLocaleDateString('pt-BR')
-            : 'Sem data';
+            : 'Not provided';
           due.append(dueValue);
 
           // Status (click to advance)
