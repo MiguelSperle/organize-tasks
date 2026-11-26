@@ -1147,14 +1147,14 @@
             info.append(desc);
           }
 
-          // Due date
+          // Due date (formatted in Brazilian Portuguese: DD/MM/AAAA)
           const due = document.createElement('div');
           due.className = 'task-meta';
           due.textContent = 'DUE DATE';
           const dueValue = document.createElement('b');
           dueValue.textContent = task.dueDate
-            ? new Date(`${task.dueDate}T12:00:00`).toLocaleDateString('en-US')
-            : 'Not provided';
+            ? new Date(`${task.dueDate}T12:00:00`).toLocaleDateString('pt-BR')
+            : 'Sem data';
           due.append(dueValue);
 
           // Status (click to advance)
