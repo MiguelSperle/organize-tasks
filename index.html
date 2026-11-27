@@ -1137,12 +1137,14 @@
           const info = document.createElement('div');
           const title = document.createElement('div');
           title.className = 'task-title';
+          title.dataset.testid = 'task-title';
           title.textContent = task.title;
           info.append(title);
 
           if (task.description) {
             const desc = document.createElement('div');
             desc.className = 'task-description';
+            desc.dataset.testid = 'task-description';
             desc.textContent = task.description;
             info.append(desc);
           }
@@ -1152,6 +1154,7 @@
           due.className = 'task-meta';
           due.textContent = 'DUE DATE';
           const dueValue = document.createElement('b');
+          dueValue.dataset.testid = 'task-due-date';
           dueValue.textContent = task.dueDate
             ? new Date(`${task.dueDate}T12:00:00`).toLocaleDateString('pt-BR')
             : 'Not provided';
