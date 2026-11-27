@@ -1,7 +1,5 @@
 # Task Tracker
 
-A small, dependency-free task management web app, built **as a practice target for end-to-end (E2E) test automation with [Playwright](https://playwright.dev/)**.
+Uma pequena aplicação web de gerenciamento de tarefas. O objetivo deste projeto não é a aplicação em si, mas oferecer um sistema simples, previsível e independente para escrever, executar e aprimorar meus conhecimentos em Testes End-to-End (E2E) automatizados com Playwright.
 
-The goal of this project is not the application itself, but to have a simple, predictable, and independent system for writing, running, and improving my knowledge of automated testing.
-
-> **AI disclosure:** this project was created with the help of AI. The application code was produced with assistance from Claude (by Anthropic).
+> Divulgação sobre o uso de IA: este projeto foi criado com o auxílio de inteligência artificial. O código da aplicação foi produzido com a assistência do Claude, da Anthropic.
